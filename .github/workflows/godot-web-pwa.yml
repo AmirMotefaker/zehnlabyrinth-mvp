@@ -27,7 +27,7 @@ jobs:
           curl -L --fail --retry 3 -o templates.tpz "https://github.com/godotengine/godot/releases/download/$GODOT_VERSION/Godot_v4.5-stable_export_templates.tpz"
           mkdir -p "$HOME/.local/share/godot/export_templates/4.5.stable"
           unzip -q templates.tpz -d "$HOME/.local/share/godot/export_templates/4.5.stable"
-          find "$HOME/.local/share/godot/export_templates/4.5.stable/templates" -maxdepth 1 -type f -name "web_*.zip" -exec mv {} "$HOME/.local/share/godot/export_templates/4.5.stable/" ;
+          mv "$HOME/.local/share/godot/export_templates/4.5.stable/templates"/web_*.zip "$HOME/.local/share/godot/export_templates/4.5.stable/"
 
       - name: Export Web/PWA build
         run: |
