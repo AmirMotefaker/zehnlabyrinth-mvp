@@ -1,0 +1,1 @@
+Canonical NEYRO visual contract: the board is a compact grid of rotatable pipe/light tiles. The player connects آغاز to ستاره by rotating tiles 90 degrees. The previous vertical-card prototype is rejected and must not be used as the product UI.
