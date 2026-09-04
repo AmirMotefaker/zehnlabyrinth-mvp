@@ -22,15 +22,24 @@ const NODE_ACTIVE_FILL := Color("65572d")
 const BLOCKER_FILL := Color("252a44")
 const BLOCKER_BORDER := Color("66729b")
 
-static var _ui_font: SystemFont
+static var _regular_font: SystemFont
+static var _bold_font: SystemFont
 
-static func ui_font() -> Font:
-	if _ui_font == null:
-		_ui_font = SystemFont.new()
-		_ui_font.font_names = PackedStringArray(["Vazirmatn", "Tahoma", "Noto Sans Arabic", "Noto Sans", "Arial", "sans-serif"])
-		_ui_font.allow_system_fallback = true
-		_ui_font.font_weight = 500
-	return _ui_font
+static func _make_font(weight: int) -> SystemFont:
+	var font := SystemFont.new()
+	font.font_names = PackedStringArray(["Vazirmatn", "Tahoma", "Noto Sans Arabic", "Noto Sans", "Arial", "sans-serif"])
+	font.allow_system_fallback = true
+	font.font_weight = weight
+	return font
+
+static func ui_font(weight: int = 500) -> Font:
+	if weight >= 700:
+		if _bold_font == null:
+			_bold_font = _make_font(800)
+		return _bold_font
+	if _regular_font == null:
+		_regular_font = _make_font(500)
+	return _regular_font
 
 static func to_persian_digits(value: Variant) -> String:
 	var text := str(value)
@@ -41,24 +50,20 @@ static func to_persian_digits(value: Variant) -> String:
 	return text
 
 static func apply_fa_label(label: Label, size: int, weight: int = 500) -> void:
-	var font := ui_font()
-	if font is SystemFont:
-		(font as SystemFont).font_weight = weight
-	label.add_theme_font_override("font", font)
+	label.add_theme_font_override("font", ui_font(weight))
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", TEXT)
-	label.text_direction = Control.TEXT_DIRECTION_RTL
+	label.text_direction = TextServer.DIRECTION_RTL
 	label.layout_direction = Control.LAYOUT_DIRECTION_RTL
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	label.language = "fa"
 
 static func apply_fa_button(button: Button, size: int = 20, accent: bool = false) -> void:
-	var font := ui_font()
-	button.add_theme_font_override("font", font)
+	button.add_theme_font_override("font", ui_font(700 if accent else 500))
 	button.add_theme_font_size_override("font_size", size)
 	button.add_theme_color_override("font_color", BG if accent else TEXT)
 	button.add_theme_color_override("font_hover_color", BG if accent else TEXT)
-	button.text_direction = Control.TEXT_DIRECTION_RTL
+	button.text_direction = TextServer.DIRECTION_RTL
 	button.layout_direction = Control.LAYOUT_DIRECTION_RTL
 	button.language = "fa"
 
