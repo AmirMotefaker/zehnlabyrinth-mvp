@@ -31,10 +31,25 @@ concurrency:
 
 jobs:
   export-web-surfaces:
-    name: Export Godot + canonical NEYRO preview + legacy Web
+    name: Export Godot + canonical Phaser + legacy Web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build and audit canonical Phaser runtime
+        working-directory: phaser
+        run: |
+          npm install --package-lock-only
+          npm ci
+          npm run typecheck
+          npm run catalog:audit
+          npm run build
+          test -s dist/index.html
+          test -s dist/manifest.webmanifest
+          test -s dist/sw.js
 
       - name: Materialize pinned Vazirmatn font
         env:
@@ -83,7 +98,14 @@ jobs:
           cp index.html godot/build/web/legacy/index.html
           test -s godot/build/web/legacy/index.html
 
-      - name: Publish canonical NEYRO puzzle preview
+      - name: Publish canonical Phaser runtime
+        run: |
+          rm -rf godot/build/web/phaser
+          mkdir -p godot/build/web/phaser
+          cp -R phaser/dist/. godot/build/web/phaser/
+          test -s godot/build/web/phaser/index.html
+
+      - name: Publish compatibility NEYRO preview
         run: |
           rm -rf godot/build/web/phaser-preview
           mkdir -p godot/build/web/phaser-preview
