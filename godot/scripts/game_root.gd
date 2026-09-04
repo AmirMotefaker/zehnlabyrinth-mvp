@@ -39,8 +39,6 @@ func _ui() -> void:
 	margin.offset_top = 34
 	margin.offset_right = -58
 	margin.offset_bottom = 430
-	margin.add_theme_constant_override("margin_left", 0)
-	margin.add_theme_constant_override("margin_right", 0)
 	root.add_child(margin)
 
 	var stack := VBoxContainer.new()
@@ -99,12 +97,21 @@ func _next() -> void:
 func _complete(reward: int) -> void:
 	status.text = "مرحله کامل شد! %s امتیاز گرفتی." % NeyroTheme.to_persian_digits(reward)
 
+func _safe_profile_text(key: String, fallback: String) -> String:
+	var value: Variant = session.profile.get(key, fallback)
+	if value == null:
+		return fallback
+	var text := str(value).strip_edges()
+	return fallback if text.is_empty() or text == "<null>" else text
+
 func _refresh() -> void:
-	var pulse_total := int(session.profile.pulses)
+	var pulse_total := int(session.profile.get("pulses", 1))
+	var track_name := _safe_profile_text("track_name", "مسیر تمرکز")
+	var track_rules := _safe_profile_text("track_rules", "مسیر نور را کامل کن")
 	subtitle.text = "%s · مرحله %s از ۱۰۰۰ · %s" % [
-		session.profile.track_name,
+		track_name,
 		NeyroTheme.to_persian_digits(session.stage),
-		session.profile.track_rules
+		track_rules
 	]
 	metrics.text = "پالس: %s از %s     حرکت: %s     راهنما: %s" % [
 		NeyroTheme.to_persian_digits(session.pulse),
