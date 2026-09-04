@@ -1,7 +1,12 @@
-name: Godot Web PWA build
+name: Godot Web PWA build and release
 
 on:
   pull_request:
+    paths:
+      - "godot/**"
+      - ".github/workflows/godot-web-pwa.yml"
+  push:
+    branches: [main]
     paths:
       - "godot/**"
       - ".github/workflows/godot-web-pwa.yml"
@@ -9,6 +14,12 @@ on:
 
 permissions:
   contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   export-web-pwa:
@@ -43,3 +54,25 @@ jobs:
           path: godot/build/web
           if-no-files-found: error
           retention-days: 14
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: godot/build/web
+
+  deploy-pages:
+    if: github.event_name != 'pull_request'
+    needs: export-web-pwa
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy NEYRO Godot Web/PWA
+        id: deployment
+        uses: actions/deploy-pages@v4
