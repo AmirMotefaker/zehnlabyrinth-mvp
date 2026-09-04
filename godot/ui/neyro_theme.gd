@@ -53,7 +53,7 @@ static func apply_fa_label(label: Label, size: int, weight: int = 500) -> void:
 	label.add_theme_font_override("font", ui_font(weight))
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", TEXT)
-	label.text_direction = TextServer.DIRECTION_RTL
+	label.text_direction = Control.TEXT_DIRECTION_RTL
 	label.layout_direction = Control.LAYOUT_DIRECTION_RTL
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	label.language = "fa"
@@ -63,7 +63,7 @@ static func apply_fa_button(button: Button, size: int = 40, accent: bool = false
 	button.add_theme_font_size_override("font_size", size)
 	button.add_theme_color_override("font_color", BG if accent else TEXT)
 	button.add_theme_color_override("font_hover_color", BG if accent else TEXT)
-	button.text_direction = TextServer.DIRECTION_RTL
+	button.text_direction = Control.TEXT_DIRECTION_RTL
 	button.layout_direction = Control.LAYOUT_DIRECTION_RTL
 	button.language = "fa"
 	button.custom_minimum_size = Vector2(230, 88)

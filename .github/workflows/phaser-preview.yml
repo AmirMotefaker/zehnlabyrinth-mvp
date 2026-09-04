@@ -25,6 +25,8 @@ jobs:
         run: npm install --package-lock-only && npm ci
       - name: Typecheck
         run: npm run typecheck
+      - name: Audit 9,000-stage catalogue
+        run: npm run catalog:audit
       - name: Build Web/PWA
         run: npm run build
       - name: Verify deployable output
