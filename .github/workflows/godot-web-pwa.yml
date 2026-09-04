@@ -32,6 +32,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Bundle pinned Vazirmatn font
+        env:
+          GOOGLE_FONTS_COMMIT: 6f9713a50c628d79f60259319d05fa0a239a9a7f
+        run: |
+          mkdir -p godot/assets/fonts
+          curl -L --fail --retry 3 \
+            -o godot/assets/fonts/Vazirmatn.ttf \
+            "https://raw.githubusercontent.com/google/fonts/$GOOGLE_FONTS_COMMIT/ofl/vazirmatn/Vazirmatn%5Bwght%5D.ttf"
+          curl -L --fail --retry 3 \
+            -o godot/assets/fonts/OFL.txt \
+            "https://raw.githubusercontent.com/google/fonts/$GOOGLE_FONTS_COMMIT/ofl/vazirmatn/OFL.txt"
+          test -s godot/assets/fonts/Vazirmatn.ttf
+          test -s godot/assets/fonts/OFL.txt
+
       - name: Install Godot and official export templates
         env:
           GODOT_VERSION: 4.5-stable
@@ -49,6 +63,7 @@ jobs:
           ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --editor --quit > godot-validation.log 2>&1 || true
           ! rg -n "Parse Error|SCRIPT ERROR|Failed to load script|Invalid get index|Invalid set index" godot-validation.log
           test -f godot/.godot/global_script_class_cache.cfg
+          test -f godot/.godot/imported/Vazirmatn.ttf-*.fontdata || find godot/.godot/imported -maxdepth 1 -type f -name 'Vazirmatn.ttf-*' | grep -q .
 
       - name: Export Godot Web/PWA build
         run: |
@@ -56,6 +71,7 @@ jobs:
           ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --export-release Web build/web/index.html
           test -f godot/build/web/index.html
           test -f godot/build/web/index.pck
+          test "$(stat -c%s godot/build/web/index.pck)" -gt 100000
 
       - name: Publish standalone Web prototype beside Godot
         run: |
