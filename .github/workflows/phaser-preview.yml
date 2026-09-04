@@ -27,6 +27,8 @@ jobs:
         run: npm run typecheck
       - name: Audit 9,000-stage catalogue
         run: npm run catalog:audit
+      - name: Audit stateful runtime mechanics
+        run: npm run runtime:audit
       - name: Build Web/PWA
         run: npm run build
       - name: Verify deployable output
