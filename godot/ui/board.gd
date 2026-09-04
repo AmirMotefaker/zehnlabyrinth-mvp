@@ -36,7 +36,7 @@ func _draw() -> void:
 	_draw_blockers()
 	_draw_relays(result)
 	_draw_pieces(result)
-	var start_lit := session.completed or (result.segments.size() > 0)
+	var start_lit: bool = session.completed or (result.segments.size() > 0)
 	_draw_node(session.level.start, "آغاز", NODE_IDLE, start_lit)
 	_draw_node(session.level.goal, "ستاره", GOAL_ON if session.completed else GOAL_IDLE, session.completed)
 
@@ -85,7 +85,7 @@ func _draw_relays(result: Dictionary) -> void:
 func _draw_pieces(result: Dictionary) -> void:
 	for index in range(session.level.pieces.size()):
 		var piece: Dictionary = session.level.pieces[index]
-		var active := result.hit_pieces.has(index)
+		var active: bool = result.hit_pieces.has(index)
 		var edge := Color("ffb55c") if session.last_hint == index else (GOAL_ON if active else Color("6377af"))
 		var rect := layout.tile_rect(piece.cell)
 		draw_rect(rect, Color("5d5331") if active else Color("263670"), true)
