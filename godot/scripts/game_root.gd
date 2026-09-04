@@ -6,7 +6,7 @@ var metrics:Label
 var subtitle:Label
 func _ready()->void:
 	add_child(board);board.configure(session);board.piece_tapped.connect(_on_piece)
-	session.changed.connect(_refresh);session.completed.connect(_complete);_ui();_refresh()
+	session.changed.connect(_refresh);session.stage_completed.connect(_complete);_ui();_refresh()
 func _button(parent:Node,text:String,pos:Vector2,action:Callable,accent:bool=false)->void:
 	var b:=Button.new();b.text=text;b.position=pos;b.size=Vector2(150,66);b.add_theme_font_size_override("font_size",20)
 	if accent:b.modulate=Color("8dfcf0")

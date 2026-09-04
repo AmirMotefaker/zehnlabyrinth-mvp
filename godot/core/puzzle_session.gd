@@ -2,7 +2,7 @@ class_name PuzzleSession
 extends RefCounted
 
 signal changed
-signal completed(reward: int)
+signal stage_completed(reward: int)
 const HINT_COST := 25
 var age_band := "adult"
 var difficulty := "hard"
@@ -45,8 +45,8 @@ func use_hint() -> Dictionary:
 
 func _finish() -> Dictionary:
 	completed=true
-	var reward:=max(10,220-hints_used*HINT_COST-max(0,moves-int(level.par_moves))*10)
-	completed.emit(reward);changed.emit()
+	var reward: int = maxi(10,220-hints_used*HINT_COST-maxi(0,moves-int(level.par_moves))*10)
+	stage_completed.emit(reward);changed.emit()
 	return {"kind":"complete","reward":reward}
 
 func send_pulse() -> Dictionary:

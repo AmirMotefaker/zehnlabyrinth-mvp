@@ -17,8 +17,8 @@ var origin := Vector2.ZERO
 
 func configure(viewport_size: Vector2, next_grid_size: int) -> void:
 	grid_size = max(2, next_grid_size)
-	var width := max(320.0, viewport_size.x - OUTER_MARGIN * 2.0)
-	var height := max(340.0, viewport_size.y - TOP - BOTTOM_MARGIN)
+	var width: float = maxf(320.0, viewport_size.x - OUTER_MARGIN * 2.0)
+	var height: float = maxf(340.0, viewport_size.y - TOP - BOTTOM_MARGIN)
 	board_rect = Rect2(Vector2(OUTER_MARGIN, TOP), Vector2(width, height))
 	step = min(width / float(grid_size - 1), height / float(grid_size - 1))
 	tile_size = min(MAX_TILE, step * TILE_RATIO)
