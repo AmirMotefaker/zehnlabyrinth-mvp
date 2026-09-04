@@ -1,0 +1,43 @@
+name: Godot Web PWA build
+
+on:
+  pull_request:
+    paths:
+      - "godot/**"
+      - ".github/workflows/godot-web-pwa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-web-pwa:
+    name: Export NEYRO Web/PWA
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Godot and official export templates
+        env:
+          GODOT_VERSION: 4.5-stable
+        run: |
+          curl -L --fail --retry 3 -o godot.zip "https://github.com/godotengine/godot/releases/download/$GODOT_VERSION/Godot_v4.5-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          chmod +x Godot_v4.5-stable_linux.x86_64
+          curl -L --fail --retry 3 -o templates.tpz "https://github.com/godotengine/godot/releases/download/$GODOT_VERSION/Godot_v4.5-stable_export_templates.tpz"
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.5.stable"
+          unzip -q templates.tpz -d "$HOME/.local/share/godot/export_templates/4.5.stable"
+
+      - name: Export Web/PWA build
+        run: |
+          ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --export-release Web build/web/index.html
+          test -f godot/build/web/index.html
+          test -f godot/build/web/index.pck
+
+      - name: Upload deployable Web/PWA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neyro-godot-web-pwa
+          path: godot/build/web
+          if-no-files-found: error
+          retention-days: 14
