@@ -46,6 +46,7 @@ jobs:
           npm ci
           npm run typecheck
           npm run catalog:audit
+          npm run runtime:audit
           npm run build
           test -s dist/index.html
           test -s dist/manifest.webmanifest
