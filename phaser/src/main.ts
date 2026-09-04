@@ -15,6 +15,7 @@ type Locale = 'fa' | 'en'
 type Rotation = 0 | 1 | 2 | 3
 type RotationMap = Record<string, Rotation>
 type UndoEntry = { key: string; previous: Rotation }
+type PulseTrace = { connected: boolean; order: Point[]; endpoint: Point }
 
 const FA = '۰۱۲۳۴۵۶۷۸۹'
 const OPPOSITE: Record<Direction, Direction> = { N: 'S', E: 'W', S: 'N', W: 'E' }
@@ -27,8 +28,9 @@ const copy = {
     tagline: 'هزارتوی ذهن · شبکهٔ نور', age: 'رده سنی', difficulty: 'سختی', chapter: 'فصل', stage: 'مرحله',
     load: 'بارگذاری', easy: 'ساده', medium: 'متوسط', hard: 'سخت', pulse: 'ارسال پالس', hint: 'راهنما −۲۵',
     undo: 'بازگشت', restart: 'شروع دوباره', next: 'مرحله بعد', ready: 'قطعه‌ها را بچرخان و مسیر نور را کامل کن.',
-    rotated: 'قطعه چرخید؛ مسیر را دوباره بررسی کن.', failed: 'پالس به مقصد نرسید؛ مسیر هنوز کامل نیست.',
-    charging: 'پالس ثبت شد؛ شبکه برای پالس بعدی شارژ شد.', solved: 'عالی! ستاره روشن شد و مرحله کامل است.',
+    rotated: 'قطعه چرخید؛ مسیر را دوباره بررسی کن.', sending: 'پالس در شبکه حرکت می‌کند…',
+    failed: 'پالس متوقف شد؛ اتصال بعدی شبکه را اصلاح کن.', charging: 'پالس ثبت شد؛ شبکه برای پالس بعدی شارژ شد.',
+    solved: 'عالی! ستاره روشن شد و مرحله کامل است.',
     hintDone: 'یک قطعهٔ مسیر اصلاح شد؛ ۲۵ امتیاز از پاداش کم می‌شود.', hintNone: 'چرخش مسیر درست است؛ پالس را ارسال کن.',
     noUndo: 'حرکتی برای بازگشت وجود ندارد.'
   },
@@ -36,8 +38,9 @@ const copy = {
     tagline: 'Mind Labyrinth · Living Light Network', age: 'Age', difficulty: 'Difficulty', chapter: 'Chapter', stage: 'Stage',
     load: 'Load', easy: 'Easy', medium: 'Medium', hard: 'Hard', pulse: 'Send pulse', hint: 'Hint −25',
     undo: 'Undo', restart: 'Restart', next: 'Next stage', ready: 'Rotate the nodes and complete the light path.',
-    rotated: 'Node rotated. Re-check the route.', failed: 'The pulse did not reach the star yet.',
-    charging: 'Pulse stored. The network is charged for the next pulse.', solved: 'Great! The star is lit and the stage is complete.',
+    rotated: 'Node rotated. Re-check the route.', sending: 'Pulse travelling through the network…',
+    failed: 'Pulse stopped. Repair the next network connection.', charging: 'Pulse stored. The network is charged for the next pulse.',
+    solved: 'Great! The star is lit and the stage is complete.',
     hintDone: 'One route node was corrected. Hint penalty: 25.', hintNone: 'The route rotations are correct. Send the pulse.',
     noUndo: 'There is no move to undo.'
   }
@@ -61,6 +64,7 @@ class NeyroScene extends Phaser.Scene {
   private pulseCount = 0
   private reached = new Set<string>()
   private solved = false
+  private pulsing = false
   private board?: Phaser.GameObjects.Container
 
   constructor() { super('neyro') }
@@ -75,18 +79,20 @@ class NeyroScene extends Phaser.Scene {
     for (let chapter = 1; chapter <= 8; chapter += 1) {
       const option = document.createElement('option'); option.value = String(chapter); el<HTMLSelectElement>('#chapterSelect').append(option)
     }
-    el<HTMLButtonElement>('#pulseButton').onclick = () => this.sendPulse()
+    el<HTMLButtonElement>('#pulseButton').onclick = () => void this.sendPulse()
     el<HTMLButtonElement>('#hintButton').onclick = () => this.hint()
     el<HTMLButtonElement>('#undoButton').onclick = () => this.undo()
     el<HTMLButtonElement>('#restartButton').onclick = () => this.restart()
     el<HTMLButtonElement>('#nextButton').onclick = () => this.loadStage(Math.min(1000, this.stageNumber + 1))
     el<HTMLButtonElement>('#loadButton').onclick = () => {
+      if (this.pulsing) return
       this.ageBand = el<HTMLSelectElement>('#ageSelect').value as AgeBand
       this.difficulty = el<HTMLSelectElement>('#difficultySelect').value as Difficulty
       const requested = Number(el<HTMLInputElement>('#stageInput').value)
       this.loadStage(Math.min(1000, Math.max(1, requested || 1)))
     }
     el<HTMLSelectElement>('#chapterSelect').onchange = event => {
+      if (this.pulsing) return
       const chapter = Number((event.target as HTMLSelectElement).value)
       this.loadStage((chapter - 1) * 125 + 1)
     }
@@ -102,6 +108,7 @@ class NeyroScene extends Phaser.Scene {
   }
 
   private loadStage(number: number) {
+    if (this.pulsing) return
     this.stageNumber = number
     this.stage = generateStage(this.currentTrack(), number)
     this.moves = 0; this.hints = 0; this.pulseCount = 0; this.solved = false; this.reached.clear(); this.undoStack = []
@@ -137,43 +144,79 @@ class NeyroScene extends Phaser.Scene {
     return this.ports(tile, this.rotationAt(row, col, tile))
   }
 
-  private tracePulse() {
+  private tracePulse(): PulseTrace {
     const queue: Point[] = [{ row: 0, col: 0 }]
     const seen = new Set<string>(['0:0'])
+    const order: Point[] = [{ row: 0, col: 0 }]
     const goalKey = keyOf(this.stage.track.boardSize - 1, this.stage.track.boardSize - 1)
+    let endpoint = order[0]
     while (queue.length) {
       const current = queue.shift()!
+      endpoint = current
       for (const direction of this.portsAt(current.row, current.col)) {
         const delta = DELTA[direction]
         const next = { row: current.row + delta.row, col: current.col + delta.col }
         if (next.row < 0 || next.col < 0 || next.row >= this.stage.track.boardSize || next.col >= this.stage.track.boardSize) continue
         if (!this.portsAt(next.row, next.col).includes(OPPOSITE[direction])) continue
         const key = keyOf(next.row, next.col)
-        if (!seen.has(key)) { seen.add(key); queue.push(next) }
+        if (!seen.has(key)) { seen.add(key); order.push(next); queue.push(next) }
       }
     }
-    this.reached = seen
-    return seen.has(goalKey)
+    const goalPoint = { row: this.stage.track.boardSize - 1, col: this.stage.track.boardSize - 1 }
+    const connected = seen.has(goalKey)
+    return { connected, order, endpoint: connected ? goalPoint : endpoint }
   }
 
-  private sendPulse() {
-    if (this.solved) return
+  private setInteractionLocked(locked: boolean) {
+    this.pulsing = locked
+    for (const id of ['pulseButton', 'hintButton', 'undoButton', 'restartButton', 'nextButton', 'loadButton']) {
+      el<HTMLButtonElement>(`#${id}`).disabled = locked
+    }
+    el<HTMLSelectElement>('#ageSelect').disabled = locked
+    el<HTMLSelectElement>('#difficultySelect').disabled = locked
+    el<HTMLSelectElement>('#chapterSelect').disabled = locked
+    el<HTMLInputElement>('#stageInput').disabled = locked
+  }
+
+  private async animatePulse(order: Point[]) {
+    this.reached.clear(); this.drawBoard()
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const delay = reduceMotion ? 0 : 90
+    for (const point of order) {
+      this.reached.add(keyOf(point.row, point.col))
+      this.drawBoard()
+      if (delay > 0) await new Promise<void>(resolve => this.time.delayedCall(delay, () => resolve()))
+    }
+  }
+
+  private async sendPulse() {
+    if (this.solved || this.pulsing) return
+    this.setInteractionLocked(true)
     this.pulseCount += 1
-    const connected = this.tracePulse()
-    if (connected && this.pulseCount >= this.stage.requiredPulses) {
+    this.setStatus(copy[this.locale].sending)
+    this.updateHud()
+    const trace = this.tracePulse()
+    await this.animatePulse(trace.order)
+
+    if (trace.connected && this.pulseCount >= this.stage.requiredPulses) {
       this.solved = true
       const bestKey = `neyro.best.${this.stage.id}`
       const score = Math.max(0, 1000 - this.moves * 12 - this.hints * 25 - (this.pulseCount - this.stage.requiredPulses) * 20)
       const previous = Number(localStorage.getItem(bestKey) || 0); if (score > previous) localStorage.setItem(bestKey, String(score))
       localStorage.setItem(`neyro.complete.${this.stage.id}`, '1')
       this.setStatus(copy[this.locale].solved)
-    } else if (connected) this.setStatus(copy[this.locale].charging)
-    else this.setStatus(this.stage.requiredPulses > 1 && this.pulseCount < this.stage.requiredPulses ? copy[this.locale].charging : copy[this.locale].failed)
-    this.updateHud(); this.drawBoard()
+    } else if (trace.connected) {
+      this.setStatus(copy[this.locale].charging)
+    } else {
+      const nodeNumber = trace.order.length
+      const detail = this.locale === 'fa' ? ` گره ${digits(nodeNumber, this.locale)} آخرین نقطه روشن بود.` : ` Node ${nodeNumber} was the last lit point.`
+      this.setStatus(copy[this.locale].failed + detail)
+    }
+    this.updateHud(); this.drawBoard(); this.setInteractionLocked(false)
   }
 
   private rotate(row: number, col: number) {
-    if (this.solved) return
+    if (this.solved || this.pulsing) return
     const tile = this.stage.grid[row][col]; if (!this.isRotatable(tile)) return
     const key = keyOf(row, col); const previous = this.rotationAt(row, col, tile)
     this.undoStack.push({ key, previous })
@@ -183,6 +226,7 @@ class NeyroScene extends Phaser.Scene {
   }
 
   private hint() {
+    if (this.pulsing) return
     const target = this.stage.solutionPath.slice(1, -1).find(point => {
       const tile = this.stage.grid[point.row][point.col]
       return this.isRotatable(tile) && this.rotationAt(point.row, point.col, tile) !== tile.targetRotation
@@ -195,12 +239,14 @@ class NeyroScene extends Phaser.Scene {
   }
 
   private undo() {
+    if (this.pulsing) return
     const action = this.undoStack.pop(); if (!action) { this.setStatus(copy[this.locale].noUndo); return }
     this.rotations[action.key] = action.previous; this.moves = Math.max(0, this.moves - 1); this.reached.clear(); this.solved = false
     this.updateHud(); this.drawBoard()
   }
 
   private restart() {
+    if (this.pulsing) return
     this.rotations = { ...this.initialRotations }; this.undoStack = []; this.moves = 0; this.hints = 0; this.pulseCount = 0; this.solved = false; this.reached.clear()
     this.setStatus(copy[this.locale].ready); this.updateHud(); this.drawBoard()
   }
@@ -241,7 +287,7 @@ class NeyroScene extends Phaser.Scene {
       this.board!.add(g)
       if (tile.kind === 'start' || tile.kind === 'goal') {
         const color = tile.kind === 'start' ? 0x5ee0c1 : 0xffd66b; const node = this.add.graphics(); node.fillStyle(0x0b1727, 1); node.lineStyle(4, color, 1); node.fillCircle(x, y, cell * .24); node.strokeCircle(x, y, cell * .24); this.board!.add(node)
-        const text = this.add.text(x, y, tile.kind === 'start' ? 'S' : '★', { fontFamily: 'system-ui', fontSize: `${Math.max(13, cell * .24)}px`, color: tile.kind === 'start' ? '#5ee0c1' : '#ffd66b', fontStyle: 'bold' }).setOrigin(.5); this.board!.add(text); return
+        const text = this.add.text(x, y, tile.kind === 'start' ? '◆' : '★', { fontFamily: 'system-ui', fontSize: `${Math.max(13, cell * .24)}px`, color: tile.kind === 'start' ? '#5ee0c1' : '#ffd66b', fontStyle: 'bold' }).setOrigin(.5); this.board!.add(text); return
       }
       if (tile.kind === 'blocker') { const xg = this.add.graphics(); xg.lineStyle(5, 0x6b7891, 1); xg.beginPath(); xg.moveTo(x-cell*.2,y-cell*.2); xg.lineTo(x+cell*.2,y+cell*.2); xg.moveTo(x+cell*.2,y-cell*.2); xg.lineTo(x-cell*.2,y+cell*.2); xg.strokePath(); this.board!.add(xg); return }
       if (tile.kind === 'empty') return
@@ -253,7 +299,7 @@ class NeyroScene extends Phaser.Scene {
         const ports = this.ports(tile, rotation); pipe.beginPath(); for (const direction of ports) { const d = DELTA[direction]; pipe.moveTo(x,y); pipe.lineTo(x+d.col*len,y+d.row*len) } pipe.strokePath()
       }
       this.board!.add(pipe)
-      if (this.isRotatable(tile)) {
+      if (this.isRotatable(tile) && !this.pulsing) {
         const hit = this.add.zone(x, y, cell, cell).setInteractive({ useHandCursor: true }); hit.on('pointerdown', () => this.rotate(r,c)); this.board!.add(hit)
       }
     }))
