@@ -22,24 +22,21 @@ const NODE_ACTIVE_FILL := Color("65572d")
 const BLOCKER_FILL := Color("252a44")
 const BLOCKER_BORDER := Color("66729b")
 
-const BUNDLED_FONT_PATH := "res://assets/fonts/Vazirmatn.ttf"
-
-static var _bundled_font: Font
-static var _system_fallback: SystemFont
-
-static func _fallback_font() -> SystemFont:
-	if _system_fallback == null:
-		_system_fallback = SystemFont.new()
-		_system_fallback.font_names = PackedStringArray(["Vazirmatn", "Tahoma", "Noto Sans Arabic", "Noto Sans", "Arial", "sans-serif"])
-		_system_fallback.allow_system_fallback = true
-	return _system_fallback
+# This literal preload is intentional. The Web exporter now sees Vazirmatn as a
+# hard dependency instead of relying on a runtime ResourceLoader.exists() probe.
+# CI materializes the pinned OFL font before Godot imports/exports the project.
+static var _bundled_font: Font = preload("res://assets/fonts/Vazirmatn.ttf")
 
 static func ui_font(_weight: int = 500) -> Font:
-	if _bundled_font == null and ResourceLoader.exists(BUNDLED_FONT_PATH):
-		_bundled_font = load(BUNDLED_FONT_PATH) as Font
-	if _bundled_font != null:
-		return _bundled_font
-	return _fallback_font()
+	return _bundled_font
+
+static func font_contract_ok() -> bool:
+	if _bundled_font == null:
+		return false
+	for glyph in ["ف", "ا", "ر", "س", "ی", "۰", "۱"]:
+		if not _bundled_font.has_char(glyph.unicode_at(0)):
+			return false
+	return true
 
 static func to_persian_digits(value: Variant) -> String:
 	var text := str(value)

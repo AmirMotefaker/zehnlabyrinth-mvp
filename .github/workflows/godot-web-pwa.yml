@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Bundle pinned Vazirmatn font
+      - name: Materialize pinned Vazirmatn font
         env:
           GOOGLE_FONTS_COMMIT: 6f9713a50c628d79f60259319d05fa0a239a9a7f
         run: |
@@ -61,9 +61,15 @@ jobs:
       - name: Validate Godot startup scripts
         run: |
           ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --editor --quit > godot-validation.log 2>&1 || true
+          cat godot-validation.log
           ! rg -n "Parse Error|SCRIPT ERROR|Failed to load script|Invalid get index|Invalid set index" godot-validation.log
           test -f godot/.godot/global_script_class_cache.cfg
           test -f godot/.godot/imported/Vazirmatn.ttf-*.fontdata || find godot/.godot/imported -maxdepth 1 -type f -name 'Vazirmatn.ttf-*' | grep -q .
+
+      - name: Verify Persian font runtime contract
+        run: |
+          ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --script res://ci/font_contract.gd | tee font-contract.log
+          grep -q "NEYRO Persian font contract: PASS" font-contract.log
 
       - name: Export Godot Web/PWA build
         run: |
