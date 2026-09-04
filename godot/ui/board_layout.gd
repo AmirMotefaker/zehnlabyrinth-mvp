@@ -3,9 +3,10 @@ extends RefCounted
 
 ## The single pixel geometry authority for NEYRO boards.
 const OUTER_MARGIN := 44.0
-const TOP := 360.0
+const TOP := 470.0
 const BOTTOM_MARGIN := 54.0
-const MAX_TILE := 104.0
+const EDGE_INSET := 92.0
+const MAX_TILE := 118.0
 const TILE_RATIO := 0.66
 
 var board_rect := Rect2()
@@ -17,10 +18,13 @@ var origin := Vector2.ZERO
 
 func configure(viewport_size: Vector2, next_grid_size: int) -> void:
 	grid_size = max(2, next_grid_size)
-	var width: float = maxf(320.0, viewport_size.x - OUTER_MARGIN * 2.0)
-	var height: float = maxf(340.0, viewport_size.y - TOP - BOTTOM_MARGIN)
+	var width: float = maxf(420.0, viewport_size.x - OUTER_MARGIN * 2.0)
+	var height: float = maxf(420.0, viewport_size.y - TOP - BOTTOM_MARGIN)
 	board_rect = Rect2(Vector2(OUTER_MARGIN, TOP), Vector2(width, height))
-	step = min(width / float(grid_size - 1), height / float(grid_size - 1))
+
+	var usable_width := maxf(220.0, width - EDGE_INSET * 2.0)
+	var usable_height := maxf(220.0, height - EDGE_INSET * 2.0)
+	step = min(usable_width / float(grid_size - 1), usable_height / float(grid_size - 1))
 	tile_size = min(MAX_TILE, step * TILE_RATIO)
 	node_radius = min(tile_size * 0.60, step * 0.42)
 	origin = board_rect.get_center() - Vector2.ONE * (float(grid_size - 1) * step * 0.5)
