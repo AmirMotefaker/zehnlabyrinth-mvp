@@ -31,6 +31,7 @@ jobs:
 
       - name: Export Web/PWA build
         run: |
+          mkdir -p godot/build/web
           ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --export-release Web build/web/index.html
           test -f godot/build/web/index.html
           test -f godot/build/web/index.pck
