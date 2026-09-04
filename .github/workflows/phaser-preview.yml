@@ -1,0 +1,43 @@
+name: Phaser migration preview
+
+on:
+  pull_request:
+    paths:
+      - "phaser/**"
+      - ".github/workflows/phaser-preview.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: phaser
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: phaser/package-lock.json
+      - name: Install dependencies
+        run: npm install --package-lock-only && npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build Web/PWA
+        run: npm run build
+      - name: Verify deployable output
+        run: |
+          test -s dist/index.html
+          test -s dist/manifest.webmanifest
+          test -s dist/sw.js
+      - name: Upload Phaser preview artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neyro-phaser-preview
+          path: phaser/dist
+          if-no-files-found: error
+          retention-days: 14
