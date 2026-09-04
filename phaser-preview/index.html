@@ -1,4 +1,54 @@
 <!doctype html>
 <html lang="fa" dir="rtl">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NEYRO — پیش‌نمایش Phaser</title><link rel="stylesheet" href="./styles.css"></head>
-<body><main id="app"><header><div><h1>هزارتوی ذهن</h1><p>پیش‌نمایش نسخه جدید</p></div><div class="stats"><span>حرکت: <b id="moves">۰</b></span><span>امتیاز: <b id="score">۱۰۰</b></span></div></header><section class="game"><div class="status" id="status">مسیر نور را از آغاز به ستاره وصل کن</div><div id="board" class="board" aria-label="صفحه بازی"></div><div class="actions"><button id="hint">راهنما</button><button id="reset">شروع دوباره</button><button id="next">مرحله بعد</button></div></section></main><script type="module" src="./game.js"></script></body></html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#08101d">
+  <title>NEYRO — هزارتوی ذهن</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<main id="app">
+  <header class="topbar">
+    <div class="brand"><h1>هزارتوی ذهن</h1><p>NEYRO — شبکه عصبی نور</p></div>
+    <div class="stats" aria-label="آمار بازی">
+      <span>مرحله <b id="stageStat">۱</b></span><span>حرکت <b id="moves">۰</b></span><span>زمان <b id="time">۰۰:۰۰</b></span><span>امتیاز <b id="score">۱۰۰۰</b></span>
+    </div>
+  </header>
+
+  <section class="control-panel" aria-label="انتخاب مسیر بازی">
+    <label>رده سنی<select id="ageSelect"><option value="0">۵ تا ۸ سال</option><option value="1">۹ تا ۱۷ سال</option><option value="2">۱۸ سال به بالا</option></select></label>
+    <label>سختی<select id="difficultySelect"><option value="0">ساده</option><option value="1">متوسط</option><option value="2">سخت</option></select></label>
+    <label>فصل<select id="chapterSelect"></select></label>
+    <label>مرحله<input id="stageInput" type="number" min="1" max="1000" value="1" inputmode="numeric"></label>
+    <button id="goStage" class="secondary">برو به مرحله</button>
+  </section>
+
+  <section class="game-shell">
+    <div class="game-head">
+      <div><strong id="trackTitle">مسیر ساده — ۵ تا ۸ سال</strong><small id="chapterTitle">فصل ۱ از ۸</small></div>
+      <div class="progress-wrap"><span id="progressText">۱ / ۱۰۰۰</span><div class="progress"><i id="progressBar"></i></div></div>
+    </div>
+    <div class="status" id="status">قطعه‌ها را بچرخان و پالس نور را از «آغاز» به «ستاره» برسان.</div>
+    <div id="board" class="board" aria-label="صفحه بازی"></div>
+    <div class="actions">
+      <button id="pulse" class="primary">ارسال پالس</button>
+      <button id="hint">راهنما −۲۵</button>
+      <button id="undo">بازگشت</button>
+      <button id="reset">شروع دوباره</button>
+      <button id="next" class="secondary">مرحله بعد</button>
+    </div>
+    <div class="meta"><span id="mechanic">مکانیک: مسیر و چرخش</span><span id="par">حرکت معیار: ۰</span><span id="catalog">۹ مسیر × ۱۰۰۰ مرحله = ۹۰۰۰ مرحله</span></div>
+  </section>
+</main>
+
+<div id="result" class="modal" hidden>
+  <div class="modal-card">
+    <div id="stars" class="stars">★★★</div>
+    <h2>شبکه روشن شد!</h2>
+    <p id="resultSummary"></p>
+    <div class="result-actions"><button id="resultNext" class="primary">مرحله بعد</button><button id="resultReplay">تکرار مرحله</button></div>
+  </div>
+</div>
+<script type="module" src="./game.js"></script>
+</body></html>
