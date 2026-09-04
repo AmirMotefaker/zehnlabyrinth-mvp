@@ -52,6 +52,10 @@ function requiredRelayKeys(stage: StageDefinition) {
     })
 }
 
+function isChargedMirror(tile: StageTile) {
+  return tile.kind === 'elbow' && tile.mechanic === 'charged-mirror'
+}
+
 export function createRuntimeState(stage: StageDefinition, rotations: RotationMap = {}): RuntimeState {
   return { rotations: { ...rotations }, pulseIndex: 0, chargedRelays: [], relayOrder: [], chargedMirrors: [], reached: [], complete: false }
 }
@@ -76,17 +80,17 @@ function ports(stage: StageDefinition, state: RuntimeState, row: number, col: nu
   return []
 }
 
-function chargedMirrorRotation(stage: StageDefinition, state: RuntimeState, row: number, col: number, tile: StageTile): Rotation {
+function chargedMirrorRotation(state: RuntimeState, row: number, col: number, tile: StageTile): Rotation {
   const key = runtimeKey(row, col)
   const base = rotationAt(state, row, col, tile)
-  if (!stage.mechanics.includes('charged-mirror') || tile.kind !== 'elbow') return base
+  if (!isChargedMirror(tile)) return base
   return state.chargedMirrors.includes(key) ? ((base + 1) % 4) as Rotation : base
 }
 
 function effectivePorts(stage: StageDefinition, state: RuntimeState, row: number, col: number): Direction[] {
   const tile = stage.grid[row][col]
-  if (stage.mechanics.includes('charged-mirror') && tile.kind === 'elbow') {
-    const rotation = chargedMirrorRotation(stage, state, row, col, tile)
+  if (isChargedMirror(tile)) {
+    const rotation = chargedMirrorRotation(state, row, col, tile)
     return ([['N', 'E'], ['E', 'S'], ['S', 'W'], ['W', 'N']][rotation] ?? []) as Direction[]
   }
   return ports(stage, state, row, col)
@@ -118,7 +122,7 @@ export function applyPulse(stage: StageDefinition, previous: RuntimeState): Puls
       state.chargedRelays.push(currentKey)
       state.relayOrder.push(currentKey)
     }
-    if (stage.mechanics.includes('charged-mirror') && tile.kind === 'elbow' && !state.chargedMirrors.includes(currentKey)) {
+    if (isChargedMirror(tile) && !state.chargedMirrors.includes(currentKey)) {
       state.chargedMirrors.push(currentKey)
     }
     for (const direction of effectivePorts(stage, previous, current.row, current.col)) {
