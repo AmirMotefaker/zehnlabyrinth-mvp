@@ -81,3 +81,78 @@ loadStage=function(n){
  if(cfg.neural)document.getElementById('demo').textContent='مرحله '+stage+' · پالس '+neuralPulse+' از ۲: ابتدا رله‌های پالس اول را بساز، سپس دکمهٔ درخشان «ارسال پالس» را بزن.';
 };
 </script>
+<script>
+/* Track-depth v2: each age × complexity cell owns a distinct playable rule-set. */
+var makeBeforeTrackDepth = makeLevel;
+function trackDepth(kind, mode, levelNo) {
+  var band = Math.floor((levelNo - 1) / 125);
+  var key = kind + '-' + mode;
+  var map = {
+    'kid-easy':   {name:'نورآموز', rules:'۱ پالس · بدون مانع · مسیر کوتاه', relays:0, walls:0, neural:false},
+    'kid-medium': {name:'نورجو', rules:'۱ پالس · یک گرهٔ رنگی · مسیر خمیده', relays:1, walls:0, neural:false},
+    'kid-hard':   {name:'نورنگهبان', rules:'۱ پالس · دو گره · دیوارهای امن', relays:2, walls:1, neural:false},
+    'teen-easy':   {name:'مسیرساز', rules:'۱ پالس · چرخش‌های بیشتر', relays:0, walls:1, neural:false},
+    'teen-medium': {name:'گره‌خوان', rules:'۱ پالس · رلهٔ ترتیبی · دیوار', relays:Math.min(2,1+Math.floor(band/2)), walls:1, neural:false},
+    'teen-hard':   {name:'حافظهٔ نور', rules:'۲ پالس · حافظهٔ رله · آینهٔ شارژشونده', relays:3, walls:2, neural:true},
+    'adult-easy':   {name:'شبکه‌خوان', rules:'۱ پالس · شاخه‌های فریبنده', relays:1, walls:2, neural:false},
+    'adult-medium': {name:'تحلیل‌گر شبکه', rules:'۱ پالس · رله‌های ترتیبی · مسیرهای فریبنده', relays:Math.min(3,2+Math.floor(band/3)), walls:Math.min(3,2+Math.floor(band/4)), neural:false},
+    'adult-hard':   {name:'معمار پالس', rules:'۲ پالس · حافظه · شارژ · مسیرهای فریبنده', relays:3, walls:2, neural:true}
+  };
+  return map[key];
+}
+function clampTrackItems(out, key, count) {
+  while (out.relays.length > count) out.relays.pop();
+  while (out.walls.length > count) out.walls.pop();
+}
+function neuralTrack(kind, levelNo) {
+  var out = neuralVariant(kind, levelNo);
+  var band = Math.floor((levelNo - 1) / 125);
+  if (kind === 'teen') {
+    out.relays = out.relays.slice(0, 2);
+    out.first = [0];
+    out.sequence = [0];
+    out.walls = out.walls.slice(0, 1);
+    out.par = Math.max(40, 72 - band * 3);
+  } else {
+    out.par = Math.max(30, 68 - band * 4);
+  }
+  out.trackName = trackDepth(kind, difficultyMode, levelNo).name;
+  out.trackRules = trackDepth(kind, difficultyMode, levelNo).rules;
+  return out;
+}
+makeLevel = function(kind, num) {
+  var spec = trackDepth(kind, difficultyMode, num);
+  if (spec.neural) return neuralTrack(kind, num);
+  var out = legacyMakeLevel(kind, num);
+  clampTrackItems(out, kind + '-' + difficultyMode, spec.relays);
+  clampTrackItems(out, kind + '-' + difficultyMode, spec.walls);
+  out.trackName = spec.name;
+  out.trackRules = spec.rules;
+  out.stageTier = Math.floor((num - 1) / 125) + 1;
+  var decoys = Math.min(3, Math.floor((num - 1) / 300));
+  var free = [[4,0],[0,4],[4,4],[0,0],[4,2],[0,2]];
+  for (var i=0; i<decoys; i++) {
+    var d=free[(num+i*3)%free.length];
+    if (!occupied(out.pieces,d[0],d[1])&&!occupied(out.relays,d[0],d[1])&&!occupied(out.walls,d[0],d[1])&&!same(d,out.start)&&!same(d,out.goal)) {
+      out.pieces.push([d[0],d[1],'mirror',(num+i)%2]);
+      out.initial.push(1-((num+i)%2));
+    }
+  }
+  out.optimal += decoys;
+  return out;
+};
+var updateDifficultyBeforeTrackDepth = updateDifficultyUI;
+updateDifficultyUI = function() {
+  updateDifficultyBeforeTrackDepth();
+  if (!age) return;
+  var spec = trackDepth(age, difficultyMode, stage);
+  document.getElementById('mechanics').innerHTML='<b>'+spec.name+'</b> · '+spec.rules+' · فصل '+(Math.floor((stage-1)/125)+1)+' از ۸';
+};
+var loadBeforeTrackDepth = loadStage;
+loadStage = function(n) {
+  loadBeforeTrackDepth(n);
+  var spec = trackDepth(age, difficultyMode, stage);
+  document.getElementById('level').textContent=copy[age].name+' · '+spec.name+' · مرحله '+stage+' از '+MAX_LEVEL;
+  document.getElementById('demo').textContent='قانون این مسیر: '+spec.rules+'. مرحله‌های بعدی هر ۱۲۵ مرحله یک لایهٔ جدید به پازل اضافه می‌کنند.';
+};
+</script>
