@@ -4,11 +4,15 @@ on:
   pull_request:
     paths:
       - "godot/**"
+      - "index.html"
+      - "README.md"
       - ".github/workflows/godot-web-pwa.yml"
   push:
     branches: [main]
     paths:
       - "godot/**"
+      - "index.html"
+      - "README.md"
       - ".github/workflows/godot-web-pwa.yml"
   workflow_dispatch:
 
@@ -23,7 +27,7 @@ concurrency:
 
 jobs:
   export-web-pwa:
-    name: Export NEYRO Web/PWA
+    name: Export NEYRO Web/PWA + Web prototype
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -43,20 +47,26 @@ jobs:
       - name: Validate Godot startup scripts
         run: |
           ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --editor --quit > godot-validation.log 2>&1 || true
-          ! rg -n "Parse Error|SCRIPT ERROR|Failed to load script" godot-validation.log
+          ! rg -n "Parse Error|SCRIPT ERROR|Failed to load script|Invalid get index|Invalid set index" godot-validation.log
           test -f godot/.godot/global_script_class_cache.cfg
 
-      - name: Export Web/PWA build
+      - name: Export Godot Web/PWA build
         run: |
           mkdir -p godot/build/web
           ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --export-release Web build/web/index.html
           test -f godot/build/web/index.html
           test -f godot/build/web/index.pck
 
-      - name: Upload deployable Web/PWA artifact
+      - name: Publish standalone Web prototype beside Godot
+        run: |
+          mkdir -p godot/build/web/legacy
+          cp index.html godot/build/web/legacy/index.html
+          test -s godot/build/web/legacy/index.html
+
+      - name: Upload deployable Pages artifact
         uses: actions/upload-artifact@v4
         with:
-          name: neyro-godot-web-pwa
+          name: neyro-dual-web-surfaces
           path: godot/build/web
           if-no-files-found: error
           retention-days: 14
@@ -79,6 +89,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy NEYRO Godot Web/PWA
+      - name: Deploy NEYRO dual web surfaces
         id: deployment
         uses: actions/deploy-pages@v4
