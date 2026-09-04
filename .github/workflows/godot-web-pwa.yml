@@ -5,6 +5,7 @@ on:
     paths:
       - "godot/**"
       - "phaser/**"
+      - "phaser-preview/**"
       - "index.html"
       - "README.md"
       - ".github/workflows/godot-web-pwa.yml"
@@ -13,6 +14,7 @@ on:
     paths:
       - "godot/**"
       - "phaser/**"
+      - "phaser-preview/**"
       - "index.html"
       - "README.md"
       - ".github/workflows/godot-web-pwa.yml"
@@ -25,28 +27,14 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   export-web-surfaces:
-    name: Export Godot + Phaser preview + legacy Web
+    name: Export Godot + canonical NEYRO preview + legacy Web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Build Phaser preview surface
-        working-directory: phaser
-        run: |
-          npm install --no-audit --no-fund
-          npm run typecheck
-          npm run build
-          test -s dist/index.html
-          test -s dist/manifest.webmanifest
-          test -s dist/sw.js
 
       - name: Materialize pinned Vazirmatn font
         env:
@@ -95,11 +83,16 @@ jobs:
           cp index.html godot/build/web/legacy/index.html
           test -s godot/build/web/legacy/index.html
 
-      - name: Publish Phaser preview beside existing surfaces
+      - name: Publish canonical NEYRO puzzle preview
         run: |
+          rm -rf godot/build/web/phaser-preview
           mkdir -p godot/build/web/phaser-preview
-          cp -R phaser/dist/. godot/build/web/phaser-preview/
+          cp -R phaser-preview/. godot/build/web/phaser-preview/
           test -s godot/build/web/phaser-preview/index.html
+          test -s godot/build/web/phaser-preview/game.js
+          test -s godot/build/web/phaser-preview/styles.css
+          grep -q 'صفحه بازی' godot/build/web/phaser-preview/index.html
+          grep -q 'grid-template-columns:repeat(5,1fr)' godot/build/web/phaser-preview/styles.css
 
       - name: Upload deployable Pages artifact
         uses: actions/upload-artifact@v4
