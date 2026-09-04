@@ -1,0 +1,21 @@
+name: Godot verify
+
+on:
+  pull_request:
+    paths:
+      - "godot/**"
+      - ".github/workflows/godot-verify.yml"
+  workflow_dispatch:
+
+jobs:
+  import-and-parse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.5
+        run: |
+          curl -L --fail --retry 3 -o godot.zip https://github.com/godotengine/godot/releases/download/4.5-stable/Godot_v4.5-stable_linux.x86_64.zip
+          unzip -q godot.zip
+          chmod +x Godot_v4.5-stable_linux.x86_64
+      - name: Import and parse the game project
+        run: ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --editor --quit
