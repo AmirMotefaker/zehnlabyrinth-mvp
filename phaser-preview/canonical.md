@@ -1,0 +1,1 @@
+Canonical NEYRO puzzle: grid tiles rotate 90 degrees; connect آغاز to ستاره; connected path lights; solved state lights both endpoints.
