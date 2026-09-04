@@ -1,0 +1,12 @@
+{
+  "name": "NEYRO — هزارتوی ذهن",
+  "short_name": "NEYRO",
+  "description": "بازی پازل نور تطبیقی برای وب و موبایل",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080d24",
+  "theme_color": "#080d24",
+  "orientation": "any"
+}
