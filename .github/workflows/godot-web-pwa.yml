@@ -40,6 +40,12 @@ jobs:
           unzip -q templates.tpz -d "$HOME/.local/share/godot/export_templates/4.5.stable"
           mv "$HOME/.local/share/godot/export_templates/4.5.stable/templates"/web_*.zip "$HOME/.local/share/godot/export_templates/4.5.stable/"
 
+      - name: Validate Godot startup scripts
+        run: |
+          ./Godot_v4.5-stable_linux.x86_64 --headless --path godot --editor --quit > godot-validation.log 2>&1 || true
+          ! rg -n "Parse Error|SCRIPT ERROR|Failed to load script" godot-validation.log
+          test -f godot/.godot/global_script_class_cache.cfg
+
       - name: Export Web/PWA build
         run: |
           mkdir -p godot/build/web
