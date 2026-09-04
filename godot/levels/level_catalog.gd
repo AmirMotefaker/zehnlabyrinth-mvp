@@ -39,7 +39,7 @@ static func _track_rules(track: String, chapter: int) -> Dictionary:
 		"kid-hard":{"name":"نورنگهبان","rules":"۱ پالس · دو گره · دیوار امن","relays":2,"blockers":1,"pulses":1,"par_moves":5},
 		"teen-easy":{"name":"مسیرساز","rules":"۱ پالس · چرخش‌های بیشتر","relays":0,"blockers":1,"pulses":1,"par_moves":4},
 		"teen-medium":{"name":"گره‌خوان","rules":"۱ پالس · رلهٔ ترتیبی · دیوار","relays":1+int(chapter/3),"blockers":1,"pulses":1,"par_moves":5},
-		"teen-hard":{"name":"حافظهٔ نور","rules":"۲ پالس · حافظه · آینهٔ شارژشونده","relays":2,"blockers":1,"pulses":2,"par_moves":6},
+		"teen-hard":{"name":"حافظهٔ نور","rules":"۲ پالس · حافظه · آینهٔ شارژشونده","relays":3,"blockers":1,"pulses":2,"par_moves":6},
 		"adult-easy":{"name":"شبکه‌خوان","rules":"۱ پالس · شاخهٔ فریبنده","relays":1,"blockers":2,"pulses":1,"par_moves":5},
 		"adult-medium":{"name":"تحلیل‌گر شبکه","rules":"۱ پالس · رلهٔ ترتیبی · شاخهٔ فریبنده","relays":2+int(chapter/4),"blockers":2,"pulses":1,"par_moves":6},
 		"adult-hard":{"name":"معمار پالس","rules":"۲ پالس · حافظه · شارژ · فریب","relays":3,"blockers":2,"pulses":2,"par_moves":7}
