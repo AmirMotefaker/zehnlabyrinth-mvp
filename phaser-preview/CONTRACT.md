@@ -1,0 +1,1 @@
+Canonical gameplay contract: 5x5 grid of rotatable pipe tiles, explicit آغاز and ستاره endpoints, light-path connectivity, 90-degree rotation per tap/click, solved state when a valid path connects endpoints. UI must be Persian-first, responsive, compact and game-like.
