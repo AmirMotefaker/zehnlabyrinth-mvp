@@ -34,7 +34,7 @@ func rotate_piece(index: int) -> void:
 	orientations[index]=1-orientations[index]; moves+=1; last_hint=-1; changed.emit()
 func expected_orientation(index: int) -> int:
 	var piece:Dictionary=level.pieces[index]
-	return 1-piece.solution if pulse==2 and piece.kind=="charged" else piece.solution
+	return 1-piece.solution if int(profile.pulses)==2 and pulse==2 and piece.kind=="charged" else piece.solution
 func use_hint() -> Dictionary:
 	if completed:return {"kind":"locked"}
 	for index in range(orientations.size()):
@@ -42,17 +42,26 @@ func use_hint() -> Dictionary:
 			orientations[index]=expected_orientation(index);moves+=1;hints_used+=1;last_hint=index;changed.emit()
 			return {"kind":"piece","index":index,"cost":HINT_COST}
 	return {"kind":"pulse","cost":0}
+
+func _finish() -> Dictionary:
+	completed=true
+	var reward:=max(10,220-hints_used*HINT_COST-max(0,moves-int(level.par_moves))*10)
+	completed.emit(reward);changed.emit()
+	return {"kind":"complete","reward":reward}
+
 func send_pulse() -> Dictionary:
 	if completed:return {"kind":"locked"}
 	var result:=trace()
+	if int(profile.pulses)==1:
+		if result.reached_goal and result.lit_relays.size()==level.relays.size():
+			return _finish()
+		return {"kind":"error","message":"پالس باید همهٔ رله‌های لازم را روشن کند و به ستاره برسد."}
 	if pulse==1:
-		if result.lit_relays!=level.first_pulse:return {"kind":"error","message":"پالس اول باید رله‌های ۱ و ۲ را روشن کند."}
+		if result.lit_relays!=level.first_pulse:return {"kind":"error","message":"پالس اول باید رله‌های مشخص‌شده را روشن کند."}
 		memory=result.lit_relays.duplicate()
 		for index in result.charged_hits:orientations[index]=1-orientations[index]
 		pulse=2;changed.emit();return {"kind":"stored","message":"حافظه ثبت شد؛ آینهٔ شارژشونده چرخید."}
 	var sequence:Array[int]=memory+result.lit_relays
 	if result.reached_goal and sequence==level.sequence:
-		completed=true
-		var reward:=max(10,220-hints_used*HINT_COST-max(0,moves-level.par_moves)*10)
-		completed.emit(reward);changed.emit();return {"kind":"complete","reward":reward}
-	return {"kind":"error","message":"پالس دوم باید رلهٔ ۳ و سپس ستاره را روشن کند."}
+		return _finish()
+	return {"kind":"error","message":"پالس دوم باید توالی را کامل و ستاره را روشن کند."}
