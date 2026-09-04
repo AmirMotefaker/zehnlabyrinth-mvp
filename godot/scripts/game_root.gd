@@ -16,52 +16,68 @@ func _ready() -> void:
 	_ui()
 	_refresh()
 
-func _button(parent: Node, text: String, pos: Vector2, action: Callable, accent: bool = false) -> void:
+func _make_button(text: String, action: Callable, accent: bool = false) -> Button:
 	var button := Button.new()
 	button.text = text
-	button.position = pos
-	button.size = Vector2(170, 66)
-	NeyroTheme.apply_fa_button(button, 20, accent)
+	NeyroTheme.apply_fa_button(button, 38, accent)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.pressed.connect(action)
-	parent.add_child(button)
+	return button
 
 func _ui() -> void:
 	var layer := CanvasLayer.new()
 	add_child(layer)
 
+	var root := Control.new()
+	root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(root)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	margin.offset_left = 58
+	margin.offset_top = 34
+	margin.offset_right = -58
+	margin.offset_bottom = 430
+	margin.add_theme_constant_override("margin_left", 0)
+	margin.add_theme_constant_override("margin_right", 0)
+	root.add_child(margin)
+
+	var stack := VBoxContainer.new()
+	stack.add_theme_constant_override("separation", 18)
+	margin.add_child(stack)
+
 	var title := Label.new()
 	title.text = "NEYRO"
-	title.position = Vector2(70, 38)
-	title.size = Vector2(430, 62)
 	title.add_theme_font_override("font", NeyroTheme.ui_font(800))
-	title.add_theme_font_size_override("font_size", 48)
+	title.add_theme_font_size_override("font_size", 64)
 	title.add_theme_color_override("font_color", NeyroTheme.TEXT)
-	layer.add_child(title)
+	stack.add_child(title)
 
 	subtitle = Label.new()
-	subtitle.position = Vector2(70, 100)
-	subtitle.size = Vector2(760, 48)
-	NeyroTheme.apply_fa_label(subtitle, 20, 500)
+	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	NeyroTheme.apply_fa_label(subtitle, 34, 500)
 	subtitle.add_theme_color_override("font_color", NeyroTheme.TEXT_MUTED)
-	layer.add_child(subtitle)
+	stack.add_child(subtitle)
 
 	status = Label.new()
-	status.position = Vector2(70, 158)
-	status.size = Vector2(430, 110)
+	status.custom_minimum_size = Vector2(0, 62)
 	status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	NeyroTheme.apply_fa_label(status, 23, 700)
-	layer.add_child(status)
+	NeyroTheme.apply_fa_label(status, 38, 700)
+	stack.add_child(status)
 
 	metrics = Label.new()
-	metrics.position = Vector2(70, 278)
-	metrics.size = Vector2(620, 54)
-	NeyroTheme.apply_fa_label(metrics, 21, 500)
+	NeyroTheme.apply_fa_label(metrics, 32, 500)
 	metrics.add_theme_color_override("font_color", NeyroTheme.TEXT_MUTED)
-	layer.add_child(metrics)
+	stack.add_child(metrics)
 
-	_button(layer, "مرحله بعد", Vector2(530, 170), _next)
-	_button(layer, "راهنما −۲۵", Vector2(715, 170), _hint)
-	_button(layer, "◉ ارسال پالس", Vector2(900, 170), _pulse, true)
+	var actions := HBoxContainer.new()
+	actions.layout_direction = Control.LAYOUT_DIRECTION_RTL
+	actions.add_theme_constant_override("separation", 18)
+	actions.add_child(_make_button("◉ ارسال پالس", _pulse, true))
+	actions.add_child(_make_button("راهنما −۲۵", _hint))
+	actions.add_child(_make_button("مرحله بعد", _next))
+	stack.add_child(actions)
 
 func _on_piece(index: int) -> void:
 	session.rotate_piece(index)
