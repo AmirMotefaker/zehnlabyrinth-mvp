@@ -21,7 +21,7 @@ static func trace(level: Dictionary, orientations: Array[int]) -> Dictionary:
 		position = next
 		if position.x < 0 or position.y < 0 or position.x >= GRID_SIZE or position.y >= GRID_SIZE or level.blockers.has(position):
 			break
-		var relay_index := level.relays.find(position)
+		var relay_index: int = level.relays.find(position)
 		if relay_index >= 0 and not lit_relays.has(relay_index):
 			lit_relays.append(relay_index)
 		if position == level.goal:
