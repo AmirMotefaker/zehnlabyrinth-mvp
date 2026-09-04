@@ -8,10 +8,11 @@ config/features=PackedStringArray("4.5", "Mobile")
 
 [display]
 window/size/viewport_width=1080
-window/size/viewport_height=1920
-window/size/window_width_override=540
-window/size/window_height_override=960
+window/size/viewport_height=1080
+window/size/window_width_override=720
+window/size/window_height_override=720
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [internationalization]
 rendering/text_driver="ICU / HarfBuzz / Graphite"
