@@ -114,7 +114,8 @@ function rotationForPorts(a: Direction, b: Direction): { kind: 'straight' | 'elb
 
 function portsForTile(tile: StageTile): Direction[] {
   if (tile.kind === 'blocker' || tile.kind === 'empty') return []
-  if (tile.kind === 'straight' || tile.kind === 'relay' || tile.kind === 'phase') {
+  if (tile.kind === 'relay' || tile.kind === 'phase') return ['N', 'E', 'S', 'W']
+  if (tile.kind === 'straight') {
     return tile.targetRotation % 2 === 0 ? ['E', 'W'] : ['N', 'S']
   }
   if (tile.kind === 'elbow') {
