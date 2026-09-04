@@ -14,19 +14,31 @@
         <div class="brand-row">
           <div>
             <div class="brand">NEYRO</div>
-            <div class="tagline">هزارتوی ذهن · نسخهٔ Phaser</div>
+            <div class="tagline" id="tagline">هزارتوی ذهن · شبکهٔ نور</div>
           </div>
-          <div class="stage-pill" id="stageLabel">مرحله ۱</div>
+          <button id="localeButton" class="compact" type="button">EN</button>
+        </div>
+
+        <div class="selectors" aria-label="انتخاب مسیر بازی">
+          <label><span id="ageText">رده سنی</span><select id="ageSelect"><option value="5-8">۵–۸</option><option value="9-17">۹–۱۷</option><option value="18+">۱۸+</option></select></label>
+          <label><span id="difficultyText">سختی</span><select id="difficultySelect"><option value="easy">ساده</option><option value="medium">متوسط</option><option value="hard">سخت</option></select></label>
+          <label><span id="chapterText">فصل</span><select id="chapterSelect"></select></label>
+          <label><span id="stageText">مرحله</span><input id="stageInput" type="number" min="1" max="1000" value="1" /></label>
+          <button id="loadButton" class="compact" type="button">بارگذاری</button>
         </div>
 
         <div class="stats" aria-live="polite">
+          <span id="stageLabel">مرحله ۱</span>
           <span id="movesLabel">حرکت: ۰</span>
+          <span id="pulseLabel">پالس: ۰/۱</span>
           <span id="statusLabel">مسیر نور را کامل کن</span>
         </div>
 
         <div class="actions">
           <button id="pulseButton" class="primary">ارسال پالس</button>
           <button id="hintButton">راهنما −۲۵</button>
+          <button id="undoButton">بازگشت</button>
+          <button id="restartButton">شروع دوباره</button>
           <button id="nextButton">مرحله بعد</button>
         </div>
       </header>
