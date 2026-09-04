@@ -177,6 +177,7 @@ loadStage = function(n) {
 /* Mobile-first game hub and in-play mission control. */
 (function(){
   var home=document.getElementById('home'), game=document.getElementById('game');
+  difficultyMode='medium';
   var modeMarkup='<div class="profile-shell"><p class="profile-title">۱. سطح چالش را انتخاب کن</p><div class="mode-pills" id="home-modes"><button data-home-mode="easy"><b>ساده</b><small>یادگیری مسیر</small></button><button data-home-mode="medium" class="active"><b>متوسط</b><small>رله و مانع</small></button><button data-home-mode="hard"><b>سخت</b><small>شبکهٔ چندپالسی</small></button></div><p class="profile-title">۲. بازیکن را انتخاب کن</p></div>';
   home.insertAdjacentHTML('afterbegin','<div class="intro-label"><i></i> تجربهٔ پازلیِ واکنش‌گرا برای همهٔ سنین</div>');
   var ageBox=home.querySelector('.ages'); ageBox.insertAdjacentHTML('beforebegin',modeMarkup);
