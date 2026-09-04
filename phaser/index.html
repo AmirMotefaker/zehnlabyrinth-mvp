@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#080d24" />
+    <meta name="description" content="NEYRO — هزارتوی ذهن، بازی پازل نور برای وب و موبایل" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <title>NEYRO | هزارتوی ذهن</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hud" aria-label="وضعیت بازی">
+        <div class="brand-row">
+          <div>
+            <div class="brand">NEYRO</div>
+            <div class="tagline">هزارتوی ذهن · نسخهٔ Phaser</div>
+          </div>
+          <div class="stage-pill" id="stageLabel">مرحله ۱</div>
+        </div>
+
+        <div class="stats" aria-live="polite">
+          <span id="movesLabel">حرکت: ۰</span>
+          <span id="statusLabel">مسیر نور را کامل کن</span>
+        </div>
+
+        <div class="actions">
+          <button id="pulseButton" class="primary">ارسال پالس</button>
+          <button id="hintButton">راهنما −۲۵</button>
+          <button id="nextButton">مرحله بعد</button>
+        </div>
+      </header>
+
+      <section class="game-card" aria-label="صفحه بازی">
+        <div id="game"></div>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

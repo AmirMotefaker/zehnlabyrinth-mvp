@@ -1,9 +1,10 @@
-name: Godot Web PWA build and release
+name: NEYRO Web surfaces build and release
 
 on:
   pull_request:
     paths:
       - "godot/**"
+      - "phaser/**"
       - "index.html"
       - "README.md"
       - ".github/workflows/godot-web-pwa.yml"
@@ -11,6 +12,7 @@ on:
     branches: [main]
     paths:
       - "godot/**"
+      - "phaser/**"
       - "index.html"
       - "README.md"
       - ".github/workflows/godot-web-pwa.yml"
@@ -26,13 +28,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  export-web-pwa:
-    name: Export NEYRO Web/PWA + Web prototype
+  export-web-surfaces:
+    name: Export Godot + Phaser preview + legacy Web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Bundle pinned Vazirmatn font
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build Phaser preview surface
+        working-directory: phaser
+        run: |
+          npm install --no-audit --no-fund
+          npm run typecheck
+          npm run build
+          test -s dist/index.html
+          test -s dist/manifest.webmanifest
+          test -s dist/sw.js
+
+      - name: Materialize pinned Vazirmatn font
         env:
           GOOGLE_FONTS_COMMIT: 6f9713a50c628d79f60259319d05fa0a239a9a7f
         run: |
@@ -79,10 +95,16 @@ jobs:
           cp index.html godot/build/web/legacy/index.html
           test -s godot/build/web/legacy/index.html
 
+      - name: Publish Phaser preview beside existing surfaces
+        run: |
+          mkdir -p godot/build/web/phaser-preview
+          cp -R phaser/dist/. godot/build/web/phaser-preview/
+          test -s godot/build/web/phaser-preview/index.html
+
       - name: Upload deployable Pages artifact
         uses: actions/upload-artifact@v4
         with:
-          name: neyro-dual-web-surfaces
+          name: neyro-web-surfaces
           path: godot/build/web
           if-no-files-found: error
           retention-days: 14
@@ -99,12 +121,12 @@ jobs:
 
   deploy-pages:
     if: github.event_name != 'pull_request'
-    needs: export-web-pwa
+    needs: export-web-surfaces
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy NEYRO dual web surfaces
+      - name: Deploy NEYRO web surfaces
         id: deployment
         uses: actions/deploy-pages@v4
