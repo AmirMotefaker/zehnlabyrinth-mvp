@@ -79,17 +79,45 @@ export function getTracks(): TrackDefinition[] {
   const tracks: TrackDefinition[] = []
   for (const ageBand of AGE_BANDS) {
     for (const difficulty of DIFFICULTIES) {
-      const ageIndex = AGE_BANDS.indexOf(ageBand)
       const difficultyIndex = DIFFICULTIES.indexOf(difficulty)
       tracks.push({
         id: `${ageBand}-${difficulty}`,
         ageBand,
         difficulty,
-        boardSize: Math.min(7, 5 + difficultyIndex + (ageIndex === 2 && difficulty === 'hard' ? 0 : 0))
+        boardSize: Math.min(7, 5 + difficultyIndex)
       })
     }
   }
   return tracks
+}
+
+export function boardSizeFor(track: TrackDefinition, chapter: number): number {
+  const safeChapter = Math.min(CHAPTERS_PER_TRACK, Math.max(1, chapter))
+
+  if (track.ageBand === '5-8') {
+    if (track.difficulty === 'easy') return 5
+    if (track.difficulty === 'medium') return 6
+    return safeChapter >= 5 ? 7 : 6
+  }
+
+  if (track.ageBand === '9-17') {
+    if (track.difficulty === 'easy') return 5
+    if (track.difficulty === 'medium') return safeChapter >= 7 ? 7 : 6
+    return safeChapter >= 7 ? 8 : 7
+  }
+
+  if (track.difficulty === 'easy') return safeChapter >= 7 ? 6 : 5
+  if (track.difficulty === 'medium') return safeChapter >= 5 ? 7 : 6
+  return safeChapter >= 5 ? 8 : 7
+}
+
+function clutterFor(track: TrackDefinition, chapter: number, stageNumber: number) {
+  if (stageNumber <= 3) return { blockerCutoff: 0.04, decoyCutoff: 0.22 }
+  const age = AGE_BANDS.indexOf(track.ageBand)
+  const diff = DIFFICULTIES.indexOf(track.difficulty)
+  const blockerCutoff = Math.min(0.32, 0.09 + age * 0.035 + diff * 0.035 + (chapter - 1) * 0.012)
+  const decoyCutoff = Math.min(0.78, blockerCutoff + 0.24 + age * 0.035 + diff * 0.045 + (chapter - 1) * 0.018)
+  return { blockerCutoff, decoyCutoff }
 }
 
 function directionBetween(from: Point, to: Point): Direction {
@@ -197,24 +225,25 @@ export function generateStage(track: TrackDefinition, stageNumber: number): Stag
   }
   const chapter = Math.floor((stageNumber - 1) / STAGES_PER_CHAPTER) + 1
   const stageInChapter = ((stageNumber - 1) % STAGES_PER_CHAPTER) + 1
-  const seed = hashString(`neyro-v1|${track.id}|${stageNumber}`)
+  const stageTrack: TrackDefinition = { ...track, boardSize: boardSizeFor(track, chapter) }
+  const seed = hashString(`neyro-v2|${track.id}|${stageNumber}|${stageTrack.boardSize}`)
   const random = mulberry32(seed)
-  const path = monotonicPath(track.boardSize, random)
+  const path = monotonicPath(stageTrack.boardSize, random)
   const pathKeys = new Set(path.map(p => `${p.row}:${p.col}`))
-  const grid: StageTile[][] = Array.from({ length: track.boardSize }, () =>
-    Array.from({ length: track.boardSize }, () => ({ kind: 'empty' as const, targetRotation: 0 as const })))
+  const grid: StageTile[][] = Array.from({ length: stageTrack.boardSize }, () =>
+    Array.from({ length: stageTrack.boardSize }, () => ({ kind: 'empty' as const, targetRotation: 0 as const })))
 
   const startDirection = directionBetween(path[0], path[1])
   const goalDirection = directionBetween(path[path.length - 1], path[path.length - 2])
   grid[0][0] = { kind: 'start', targetRotation: 0 }
-  grid[track.boardSize - 1][track.boardSize - 1] = { kind: 'goal', targetRotation: 0 }
+  grid[stageTrack.boardSize - 1][stageTrack.boardSize - 1] = { kind: 'goal', targetRotation: 0 }
 
   for (let i = 1; i < path.length - 1; i += 1) {
     const current = path[i]
     const toPrevious = directionBetween(current, path[i - 1])
     const toNext = directionBetween(current, path[i + 1])
     const shape = rotationForPorts(toPrevious, toNext)
-    const relayEligible = chapter >= 3 && i > 1 && i < path.length - 2 && (i + stageNumber) % Math.max(3, 7 - chapter) === 0
+    const relayEligible = stageNumber > 3 && chapter >= 3 && i > 1 && i < path.length - 2 && (i + stageNumber) % Math.max(3, 7 - chapter) === 0
     const phaseEligible = chapter >= 7 && relayEligible && track.difficulty !== 'easy'
     grid[current.row][current.col] = {
       kind: phaseEligible ? 'phase' : relayEligible ? 'relay' : shape.kind,
@@ -223,13 +252,14 @@ export function generateStage(track: TrackDefinition, stageNumber: number): Stag
     }
   }
 
-  for (let r = 0; r < track.boardSize; r += 1) {
-    for (let c = 0; c < track.boardSize; c += 1) {
+  const clutter = clutterFor(track, chapter, stageNumber)
+  for (let r = 0; r < stageTrack.boardSize; r += 1) {
+    for (let c = 0; c < stageTrack.boardSize; c += 1) {
       if (pathKeys.has(`${r}:${c}`)) continue
       const roll = random()
-      if (roll < 0.28) {
+      if (roll < clutter.blockerCutoff) {
         grid[r][c] = { kind: 'blocker', targetRotation: 0, mechanic: 'blocker' }
-      } else if (roll < 0.68) {
+      } else if (roll < clutter.decoyCutoff) {
         grid[r][c] = {
           kind: random() < 0.55 ? 'straight' : 'elbow',
           targetRotation: Math.floor(random() * 4) as 0 | 1 | 2 | 3,
@@ -239,17 +269,18 @@ export function generateStage(track: TrackDefinition, stageNumber: number): Stag
     }
   }
 
-  const mechanics = mechanicsFor(track, chapter)
-  const requiredPulses = requiredPulsesFor(track, chapter)
+  const mechanics = stageNumber <= 3 ? ['rail', 'elbow'] : mechanicsFor(track, chapter)
+  const requiredPulses = stageNumber <= 3 ? 1 : requiredPulsesFor(track, chapter)
+  const diffIndex = DIFFICULTIES.indexOf(track.difficulty)
   const base: Omit<StageDefinition, 'fingerprint'> = {
     id: `${track.id}-${String(stageNumber).padStart(4, '0')}`,
-    track,
+    track: stageTrack,
     stageNumber,
     chapter,
     stageInChapter,
     seed,
     requiredPulses,
-    parMoves: Math.max(3, Math.round(path.length * (0.55 + chapter * 0.025))),
+    parMoves: Math.max(3, Math.round(path.length * (0.53 + chapter * 0.025 + diffIndex * 0.02))),
     mechanics,
     startDirection,
     goalDirection,
