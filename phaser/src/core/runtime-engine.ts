@@ -70,7 +70,7 @@ function ports(stage: StageDefinition, state: RuntimeState, row: number, col: nu
   if (tile.kind === 'start') return [stage.startDirection]
   if (tile.kind === 'goal') return [stage.goalDirection]
   if (tile.kind === 'phase') {
-    const opensOn = Math.max(2, stage.requiredPulses)
+    const opensOn = stage.requiredPulses
     return state.pulseIndex + 1 >= opensOn ? ['N', 'E', 'S', 'W'] : []
   }
   if (tile.kind === 'relay') return ['N', 'E', 'S', 'W']
