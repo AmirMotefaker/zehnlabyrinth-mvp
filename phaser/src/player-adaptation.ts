@@ -4,6 +4,7 @@ type Difficulty = 'easy' | 'medium' | 'hard'
 const FA = '۰۱۲۳۴۵۶۷۸۹'
 const ageSelect = document.querySelector<HTMLSelectElement>('#ageSelect')
 const difficultySelect = document.querySelector<HTMLSelectElement>('#difficultySelect')
+const chapterSelect = document.querySelector<HTMLSelectElement>('#chapterSelect')
 const stageLabel = document.querySelector<HTMLElement>('#stageLabel')
 const movesLabel = document.querySelector<HTMLElement>('#movesLabel')
 const statusLabel = document.querySelector<HTMLElement>('#statusLabel')
@@ -25,7 +26,23 @@ function locale() { return document.documentElement.lang === 'en' ? 'en' : 'fa' 
 function digits(value: string) { return locale() === 'fa' ? value.replace(/\d/g, d => FA[Number(d)]) : value }
 function age(): AgeBand { return (ageSelect?.value as AgeBand) || '5-8' }
 function difficulty(): Difficulty { return (difficultySelect?.value as Difficulty) || 'easy' }
-function boardSize() { return difficulty() === 'easy' ? 5 : difficulty() === 'medium' ? 6 : 7 }
+function chapter() { return Math.min(8, Math.max(1, Number(chapterSelect?.value || 1))) }
+function boardSize() {
+  const c = chapter()
+  if (age() === '5-8') {
+    if (difficulty() === 'easy') return 5
+    if (difficulty() === 'medium') return 6
+    return c >= 5 ? 7 : 6
+  }
+  if (age() === '9-17') {
+    if (difficulty() === 'easy') return 5
+    if (difficulty() === 'medium') return c >= 7 ? 7 : 6
+    return c >= 7 ? 8 : 7
+  }
+  if (difficulty() === 'easy') return c >= 7 ? 6 : 5
+  if (difficulty() === 'medium') return c >= 5 ? 7 : 6
+  return c >= 5 ? 8 : 7
+}
 function formatTime(ms: number) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000))
   const minutes = Math.floor(totalSeconds / 60)
@@ -88,6 +105,7 @@ function render() {
 
 ageSelect?.addEventListener('change', () => { theme(); resetTimer() })
 difficultySelect?.addEventListener('change', () => { theme(); resetTimer() })
+chapterSelect?.addEventListener('change', theme)
 
 document.addEventListener('visibilitychange', () => {
   if (completed) return
