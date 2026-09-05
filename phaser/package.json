@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --pretty false",
     "catalog:audit": "tsx tools/catalog-audit.ts",
+    "runtime:audit": "tsx tools/runtime-audit.ts",
+    "validate": "npm run typecheck && npm run catalog:audit && npm run runtime:audit",
     "preview": "vite preview",
     "cap:sync": "npm run build && cap sync"
   },
