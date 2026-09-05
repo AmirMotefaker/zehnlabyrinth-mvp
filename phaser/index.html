@@ -8,7 +8,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>NEYRO | هزارتوی ذهن</title>
   </head>
-  <body>
+  <body data-age="5-8" data-difficulty="easy">
     <main class="app-shell">
       <header class="hud" aria-label="وضعیت بازی">
         <div class="brand-row">
@@ -19,6 +19,19 @@
           <button id="localeButton" class="compact language-switch" type="button" aria-label="تغییر زبان">EN</button>
         </div>
 
+        <section class="player-profile" aria-label="پروفایل بازی">
+          <div class="profile-badges">
+            <span id="ageBadge" class="profile-badge">سن ۵–۸</span>
+            <span id="difficultyBadge" class="profile-badge">ساده</span>
+            <span id="boardSizeLabel" class="profile-badge">شبکه ۵×۵</span>
+          </div>
+          <div class="profile-controls">
+            <label><span id="ageText">رده سنی</span><select id="ageSelect"><option value="5-8">۵–۸</option><option value="9-17">۹–۱۷</option><option value="18+">۱۸+</option></select></label>
+            <label><span id="difficultyText">سختی</span><select id="difficultySelect"><option value="easy">ساده</option><option value="medium">متوسط</option><option value="hard">سخت</option></select></label>
+            <button id="loadButton" class="compact" type="button">اعمال</button>
+          </div>
+        </section>
+
         <section class="mission" aria-live="polite">
           <span class="mission-kicker">هدف مرحله</span>
           <strong id="statusLabel">قطعه‌ها را بچرخان و مسیر نور را کامل کن.</strong>
@@ -28,6 +41,8 @@
           <span id="stageLabel">مرحله ۱</span>
           <span id="movesLabel">حرکت: ۰</span>
           <span id="pulseLabel">پالس: ۰/۱</span>
+          <span id="timerLabel">زمان: ۰۰:۰۰</span>
+          <span id="bestTimeLabel">بهترین: —</span>
         </div>
 
         <div class="actions player-actions" aria-label="کنترل‌های بازی">
@@ -39,13 +54,10 @@
         </div>
 
         <details class="advanced-panel">
-          <summary>انتخاب مسیر و مرحله</summary>
-          <div class="selectors" aria-label="انتخاب مسیر بازی">
-            <label><span id="ageText">رده سنی</span><select id="ageSelect"><option value="5-8">۵–۸</option><option value="9-17">۹–۱۷</option><option value="18+">۱۸+</option></select></label>
-            <label><span id="difficultyText">سختی</span><select id="difficultySelect"><option value="easy">ساده</option><option value="medium">متوسط</option><option value="hard">سخت</option></select></label>
+          <summary>انتخاب فصل و مرحله</summary>
+          <div class="selectors stage-selectors" aria-label="انتخاب مرحله">
             <label><span id="chapterText">فصل</span><select id="chapterSelect"></select></label>
             <label><span id="stageText">مرحله</span><input id="stageInput" type="number" min="1" max="1000" value="1" inputmode="numeric" /></label>
-            <button id="loadButton" class="compact" type="button">بارگذاری</button>
           </div>
         </details>
       </header>
@@ -55,5 +67,6 @@
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/player-adaptation.ts"></script>
   </body>
 </html>
