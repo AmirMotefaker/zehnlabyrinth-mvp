@@ -1,3 +1,5 @@
+export {}
+
 type ThemeChoice = 'dark' | 'light' | 'system'
 type Locale = 'fa' | 'en'
 
