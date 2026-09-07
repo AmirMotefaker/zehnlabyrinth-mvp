@@ -199,16 +199,98 @@ body.is-solved .game-card {
   to { opacity:1; transform:translateY(0) scale(1); }
 }
 
+/* Issue #79 — platform-adaptive gameplay composition. */
 @media(min-width:1100px){
-  .app-shell { grid-template-columns:minmax(420px,.86fr) minmax(600px,1.14fr); grid-template-rows:1fr; align-items:start; }
-  .hud { position:sticky; top:16px; max-height:calc(100vh - 32px); overflow:auto; }
-  .game-card { height:calc(100vh - 40px); min-height:680px; }
-  .compact-stats { grid-template-columns:repeat(2,1fr); }
+  .app-shell {
+    width:min(1480px,100%);
+    grid-template-columns:1fr;
+    grid-template-rows:auto minmax(680px,1fr);
+    align-items:stretch;
+    gap:14px;
+  }
+  .hud {
+    position:relative;
+    top:auto;
+    max-height:none;
+    overflow:visible;
+    display:grid;
+    grid-template-columns:minmax(230px,.75fr) minmax(500px,1.8fr) minmax(330px,1fr);
+    grid-template-areas:
+      'brand profile profile'
+      'mission mission stats'
+      'actions actions advanced';
+    gap:10px 12px;
+    align-items:center;
+    padding:14px 16px;
+  }
+  .brand-row { grid-area:brand; align-self:stretch; }
+  .brand { font-size:clamp(30px,2.7vw,44px); }
+  .tagline { max-width:28ch; }
+  .player-profile {
+    grid-area:profile;
+    margin:0;
+    flex-direction:row;
+    align-items:center;
+    min-height:74px;
+  }
+  .profile-controls {
+    width:auto;
+    min-width:min(100%,430px);
+    grid-template-columns:minmax(105px,1fr) minmax(105px,1fr) auto;
+  }
+  .mission {
+    grid-area:mission;
+    margin:0;
+    min-height:66px;
+    justify-content:center;
+  }
+  .compact-stats {
+    grid-area:stats;
+    margin:0;
+    grid-template-columns:repeat(2,minmax(110px,1fr));
+  }
   .compact-stats span:first-child { grid-column:1/-1; }
-  .player-actions { grid-template-columns:repeat(2,1fr); }
-  .player-actions .primary { grid-column:1/-1; }
-  .player-profile { align-items:stretch; flex-direction:column; }
-  .profile-controls { width:100%; min-width:0; }
+  .player-actions {
+    grid-area:actions;
+    margin:0;
+    grid-template-columns:minmax(210px,1.7fr) repeat(4,minmax(112px,1fr));
+  }
+  .player-actions .primary { grid-column:auto; }
+  .advanced-panel {
+    grid-area:advanced;
+    margin:0;
+    padding:0;
+    border-top:0;
+    justify-self:end;
+  }
+  .advanced-panel[open] {
+    position:relative;
+    z-index:10;
+  }
+  .advanced-panel[open] .selectors {
+    position:absolute;
+    inset-inline-end:0;
+    top:calc(100% + 8px);
+    width:310px;
+    padding:12px;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--surface);
+    box-shadow:0 18px 48px var(--shadow);
+  }
+  .game-card {
+    width:100%;
+    min-height:680px;
+    height:min(78vh,900px);
+    justify-self:stretch;
+  }
+}
+
+@media(min-width:700px) and (max-width:1099px){
+  .app-shell { width:min(1050px,100%); }
+  .hud { position:relative; }
+  .player-profile { align-items:center; }
+  .game-card { height:min(70vh,780px); }
 }
 
 @media(max-width:850px){
@@ -217,22 +299,66 @@ body.is-solved .game-card {
 }
 
 @media(max-width:620px){
+  body { padding-bottom:calc(88px + env(safe-area-inset-bottom)); }
   .app-shell { padding:6px; gap:8px; }
-  .hud { border-radius:18px; padding:10px; }
-  .brand { font-size:30px; }
+  .hud { border-radius:18px; padding:10px; overflow:visible; }
+  .brand-row { align-items:center; }
+  .brand { font-size:28px; }
+  .tagline { font-size:10px; max-width:26ch; }
   .top-controls { border:0; padding:0; background:none; }
-  .compact-stats { grid-template-columns:repeat(2,1fr); }
-  .compact-stats span { min-height:34px; }
-  .player-actions { grid-template-columns:repeat(2,1fr); }
-  .player-actions .primary { grid-column:1/-1; }
-  .game-card { min-height:480px; height:62vh; border-radius:20px; }
+  .player-profile {
+    margin-top:8px;
+    padding:8px;
+  }
+  .profile-badges { gap:5px; }
+  .profile-badge { min-height:28px; padding:4px 8px; font-size:10px; }
+  .profile-controls { display:none; }
+  .mission {
+    margin-top:8px;
+    padding:8px 10px;
+    min-height:54px;
+  }
+  .mission-kicker { font-size:10px; }
+  #statusLabel { font-size:12px; line-height:1.55; }
+  .compact-stats {
+    grid-template-columns:1.4fr repeat(2,1fr);
+    margin-top:7px;
+  }
+  .compact-stats span { min-height:32px; font-size:10px; padding:4px 6px; }
+  #pulseLabel,#bestTimeLabel { display:none; }
+  .advanced-panel { margin-top:6px; }
+  .player-actions {
+    position:fixed;
+    z-index:60;
+    inset-inline:8px;
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    margin:0;
+    padding:7px;
+    display:grid;
+    grid-template-columns:1.35fr repeat(3,1fr);
+    gap:5px;
+    border:1px solid color-mix(in srgb,var(--border) 84%,transparent);
+    border-radius:18px;
+    background:color-mix(in srgb,var(--surface) 94%,transparent);
+    backdrop-filter:blur(18px);
+    box-shadow:0 18px 48px var(--shadow),inset 0 1px 0 color-mix(in srgb,var(--text) 5%,transparent);
+  }
+  .player-actions button { min-height:52px; padding:6px; font-size:10px; border-radius:12px; }
+  .player-actions .primary { grid-column:auto; min-height:52px; }
+  #nextButton { display:none; }
+  .game-card {
+    min-height:500px;
+    height:calc(100svh - 300px);
+    max-height:720px;
+    border-radius:20px;
+  }
 }
 
 @media(max-width:390px){
-  .profile-controls { grid-template-columns:1fr; }
-  .profile-controls .compact { grid-column:auto; }
-  .compact-stats { grid-template-columns:1fr 1fr; }
-  .player-actions button { min-height:46px; font-size:11px; }
+  .compact-stats { grid-template-columns:1.45fr 1fr 1fr; }
+  .player-actions { inset-inline:5px; bottom:calc(5px + env(safe-area-inset-bottom)); }
+  .player-actions button { min-height:48px; font-size:9px; }
+  .game-card { min-height:460px; height:calc(100svh - 286px); }
 }
 
 @media(prefers-reduced-motion:reduce){
