@@ -1,4 +1,5 @@
 import './premium.css'
+import './board-polish.css'
 
 export {}
 
