@@ -1,4 +1,4 @@
-import { generateCatalogue, TOTAL_STAGES, validateStage } from '../src/core/stage-engine'
+import { CHAPTERS_PER_TRACK, generateCatalogue, STAGES_PER_CHAPTER, STAGES_PER_TRACK, TOTAL_STAGES, validateStage } from '../src/core/stage-engine'
 
 const catalogue = generateCatalogue()
 const fingerprints = new Set<string>()
@@ -47,19 +47,19 @@ if (invalid.length !== 0) {
   console.error(invalid.slice(0, 20).join('\n'))
   throw new Error(`Invalid stages: ${invalid.length}`)
 }
-if (Object.keys(byTrack).length !== 9 || Object.values(byTrack).some(count => count !== 1000)) throw new Error('Track distribution contract failed')
-if (Object.keys(byChapter).length !== 72 || Object.values(byChapter).some(count => count !== 125)) throw new Error('Chapter distribution contract failed')
+if (Object.keys(byTrack).length !== 9 || Object.values(byTrack).some(count => count !== STAGES_PER_TRACK)) throw new Error('Track distribution contract failed')
+if (Object.keys(byChapter).length !== 9 * CHAPTERS_PER_TRACK || Object.values(byChapter).some(count => count !== STAGES_PER_CHAPTER)) throw new Error('Chapter distribution contract failed')
 
 const expectedBoardSizes: Record<string, number[]> = {
-  '5-8-easy': [5],
-  '5-8-medium': [6],
+  '5-8-easy': [4, 5],
+  '5-8-medium': [5, 6],
   '5-8-hard': [6, 7],
-  '9-17-easy': [5],
+  '9-17-easy': [5, 6],
   '9-17-medium': [6, 7],
   '9-17-hard': [7, 8],
-  '18+-easy': [5, 6],
-  '18+-medium': [6, 7],
-  '18+-hard': [7, 8]
+  '18+-easy': [6, 7],
+  '18+-medium': [7, 8],
+  '18+-hard': [8]
 }
 for (const [track, expected] of Object.entries(expectedBoardSizes)) {
   const actual = boardSizeSummary[track] ?? []
@@ -67,5 +67,5 @@ for (const [track, expected] of Object.entries(expectedBoardSizes)) {
 }
 if (Object.values(boardSizeSummary).flat().some(size => size > 8)) throw new Error('Mobile-safe 8x8 board ceiling violated')
 
-console.log('CATALOGUE_GATE=PASS 9000 total / 9000 unique / 0 unsolved / 0 invalid')
-console.log('PROGRESSIVE_DIFFICULTY_GATE=PASS age-aware board sizes / mobile ceiling 8x8')
+console.log('CATALOGUE_GATE=PASS 90000 total / 90000 unique / 0 unsolved / 0 invalid')
+console.log('PROGRESSIVE_DIFFICULTY_GATE=PASS age+difficulty-aware board sizes / mobile ceiling 8x8')
