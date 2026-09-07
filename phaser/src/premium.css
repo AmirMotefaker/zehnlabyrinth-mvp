@@ -1,0 +1,241 @@
+/* NEYRO premium presentation layer — Issue #77 */
+:root {
+  --premium-radius:26px;
+  --premium-radius-sm:16px;
+  --premium-stroke:color-mix(in srgb,var(--border) 78%,transparent);
+  --premium-highlight:color-mix(in srgb,var(--accent) 22%,transparent);
+  --premium-energy:color-mix(in srgb,var(--energy) 24%,transparent);
+}
+
+body {
+  background-attachment:fixed;
+}
+
+.app-shell {
+  width:min(1320px,100%);
+  padding:clamp(10px,1.5vw,20px);
+  gap:14px;
+}
+
+.hud {
+  position:relative;
+  overflow:hidden;
+  border-color:var(--premium-stroke);
+}
+.hud::before {
+  content:'';
+  position:absolute;
+  inset:0 auto auto 0;
+  width:42%;
+  height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent);
+  opacity:.9;
+  pointer-events:none;
+}
+
+.brand-row {
+  align-items:center;
+}
+.brand {
+  font-size:clamp(32px,4vw,52px);
+  letter-spacing:.065em;
+  text-shadow:0 0 28px var(--glow);
+}
+.tagline {
+  font-size:clamp(11px,1vw,14px);
+  letter-spacing:.01em;
+}
+
+.top-controls {
+  padding:6px;
+  border:1px solid color-mix(in srgb,var(--border) 68%,transparent);
+  background:color-mix(in srgb,var(--surface-2) 58%,transparent);
+  border-radius:14px;
+}
+
+.player-profile {
+  background:linear-gradient(135deg,color-mix(in srgb,var(--surface-2) 78%,transparent),color-mix(in srgb,var(--surface) 90%,transparent));
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 5%,transparent);
+}
+.profile-badge {
+  letter-spacing:.01em;
+  backdrop-filter:blur(10px);
+}
+.profile-badge:first-child {
+  background:color-mix(in srgb,var(--accent) 11%,var(--surface-2));
+}
+
+.mission {
+  position:relative;
+  padding:14px 16px;
+  border-color:color-mix(in srgb,var(--accent) 32%,var(--border));
+  box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 55%,transparent);
+}
+[dir='rtl'] .mission { box-shadow:inset -3px 0 0 color-mix(in srgb,var(--accent) 55%,transparent); }
+#statusLabel {
+  max-width:76ch;
+}
+
+.compact-stats {
+  display:grid;
+  grid-template-columns:1.35fr repeat(4,minmax(92px,1fr));
+  gap:7px;
+}
+.compact-stats span {
+  justify-content:center;
+  min-height:38px;
+  font-weight:750;
+  border-color:color-mix(in srgb,var(--border) 74%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface-2) 52%,var(--surface)),var(--surface));
+}
+#timerLabel,
+#bestTimeLabel {
+  font-variant-numeric:tabular-nums;
+}
+#timerLabel {
+  box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--accent) 45%,transparent);
+}
+
+.player-actions {
+  gap:8px;
+  grid-template-columns:1.6fr repeat(4,1fr);
+}
+.player-actions button {
+  position:relative;
+  overflow:hidden;
+  min-height:52px;
+  border-color:color-mix(in srgb,var(--border) 82%,transparent);
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--text) 4%,transparent);
+}
+.player-actions button::after {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(115deg,transparent 30%,color-mix(in srgb,#fff 8%,transparent) 48%,transparent 66%);
+  transform:translateX(-130%);
+  transition:transform .45s ease;
+  pointer-events:none;
+}
+.player-actions button:hover::after { transform:translateX(130%); }
+.player-actions button:active { transform:translateY(1px) scale(.995); }
+.player-actions .primary {
+  min-height:56px;
+  border-width:1.5px;
+  background:linear-gradient(135deg,var(--accent-strong),color-mix(in srgb,var(--accent-strong) 74%,#000));
+  box-shadow:0 10px 28px var(--glow),inset 0 1px 0 color-mix(in srgb,#fff 14%,transparent);
+}
+body.is-pulse-ready .player-actions .primary:not(:disabled) {
+  animation:pulseReady 1.7s ease-in-out infinite;
+}
+
+.advanced-panel {
+  opacity:.8;
+  transition:opacity .2s ease;
+}
+.advanced-panel:hover,.advanced-panel[open] { opacity:1; }
+
+.game-card {
+  position:relative;
+  min-height:560px;
+  height:min(74vh,860px);
+  border-radius:30px;
+  border-color:color-mix(in srgb,var(--accent) 18%,var(--border));
+  background:
+    radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--accent) 8%,transparent),transparent 46%),
+    var(--game);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb,var(--text) 3%,transparent),
+    0 26px 80px var(--shadow),
+    0 0 70px color-mix(in srgb,var(--accent) 5%,transparent);
+}
+.game-card::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  z-index:2;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--accent) 3%,transparent),transparent 24%,transparent 78%,color-mix(in srgb,var(--accent) 3%,transparent));
+}
+#game canvas {
+  transition:filter .25s ease,opacity .25s ease;
+}
+
+/* Canvas identity: distinct age signatures while preserving mechanic contrast. */
+body[data-age='5-8'] #game canvas { filter:saturate(1.16) brightness(1.04); }
+body[data-age='9-17'] #game canvas { filter:saturate(1.12) hue-rotate(10deg); }
+body[data-age='18+'] #game canvas { filter:saturate(.96) contrast(1.04); }
+body[data-theme='light'] #game canvas { filter:brightness(1.08) saturate(.94) contrast(.92); }
+body[data-theme='light'][data-age='5-8'] #game canvas { filter:brightness(1.08) saturate(1.07) contrast(.93); }
+body[data-theme='light'][data-age='9-17'] #game canvas { filter:brightness(1.06) saturate(1.04) hue-rotate(8deg) contrast(.94); }
+
+body[data-age='5-8'] .game-card {
+  border-radius:34px;
+  box-shadow:0 28px 76px var(--shadow),0 0 68px color-mix(in srgb,var(--accent) 9%,transparent);
+}
+body[data-age='9-17'] .game-card {
+  box-shadow:0 28px 80px var(--shadow),0 0 82px color-mix(in srgb,var(--accent) 10%,transparent);
+}
+body[data-age='18+'] .game-card {
+  border-radius:24px;
+}
+
+#completionResult {
+  border-color:var(--success)!important;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--success) 18%,var(--surface)),var(--surface-2))!important;
+  color:var(--text)!important;
+  box-shadow:0 14px 42px color-mix(in srgb,var(--success) 13%,transparent),inset 0 1px 0 color-mix(in srgb,#fff 7%,transparent);
+  animation:completionEnter .42s cubic-bezier(.2,.85,.25,1) both;
+}
+body.is-solved .game-card {
+  box-shadow:0 28px 86px var(--shadow),0 0 90px color-mix(in srgb,var(--success) 13%,transparent);
+}
+
+@keyframes pulseReady {
+  0%,100% { box-shadow:0 10px 28px var(--glow),0 0 0 0 color-mix(in srgb,var(--accent) 0%,transparent); }
+  50% { box-shadow:0 12px 34px var(--glow),0 0 0 5px color-mix(in srgb,var(--accent) 10%,transparent); }
+}
+@keyframes completionEnter {
+  from { opacity:0; transform:translateY(-6px) scale(.985); }
+  to { opacity:1; transform:translateY(0) scale(1); }
+}
+
+@media(min-width:1100px){
+  .app-shell { grid-template-columns:minmax(420px,.86fr) minmax(600px,1.14fr); grid-template-rows:1fr; align-items:start; }
+  .hud { position:sticky; top:16px; max-height:calc(100vh - 32px); overflow:auto; }
+  .game-card { height:calc(100vh - 40px); min-height:680px; }
+  .compact-stats { grid-template-columns:repeat(2,1fr); }
+  .compact-stats span:first-child { grid-column:1/-1; }
+  .player-actions { grid-template-columns:repeat(2,1fr); }
+  .player-actions .primary { grid-column:1/-1; }
+  .player-profile { align-items:stretch; flex-direction:column; }
+  .profile-controls { width:100%; min-width:0; }
+}
+
+@media(max-width:850px){
+  .compact-stats { grid-template-columns:repeat(2,1fr); }
+  .compact-stats span:first-child { grid-column:1/-1; }
+}
+
+@media(max-width:620px){
+  .app-shell { padding:6px; gap:8px; }
+  .hud { border-radius:18px; padding:10px; }
+  .brand { font-size:30px; }
+  .top-controls { border:0; padding:0; background:none; }
+  .compact-stats { grid-template-columns:repeat(2,1fr); }
+  .compact-stats span { min-height:34px; }
+  .player-actions { grid-template-columns:repeat(2,1fr); }
+  .player-actions .primary { grid-column:1/-1; }
+  .game-card { min-height:480px; height:62vh; border-radius:20px; }
+}
+
+@media(max-width:390px){
+  .profile-controls { grid-template-columns:1fr; }
+  .profile-controls .compact { grid-column:auto; }
+  .compact-stats { grid-template-columns:1fr 1fr; }
+  .player-actions button { min-height:46px; font-size:11px; }
+}
+
+@media(prefers-reduced-motion:reduce){
+  body.is-pulse-ready .player-actions .primary,#completionResult { animation:none!important; }
+  .player-actions button::after { display:none; }
+}
