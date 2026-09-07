@@ -3,78 +3,75 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#080d24" />
+    <meta name="theme-color" content="#07101c" />
     <meta name="description" content="NEYRO — هزارتوی ذهن، بازی بین‌المللی منطق فضایی و شبکهٔ نور برای وب و موبایل" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <title>NEYRO | هزارتوی ذهن</title>
   </head>
   <body data-age="5-8" data-difficulty="easy" data-theme="dark">
-    <main class="app-shell">
-      <header class="hud" aria-label="وضعیت بازی">
-        <div class="brand-row">
-          <div>
-            <div class="brand">NEYRO</div>
-            <div class="tagline" id="tagline">هزارتوی ذهن · شبکهٔ نور</div>
-          </div>
-          <div class="top-controls">
-            <label class="theme-control">
-              <span id="themeText">حالت نمایش</span>
-              <select id="themeSelect" aria-label="حالت نمایش">
-                <option value="dark">تیره</option>
-                <option value="light">روشن</option>
-                <option value="system">سیستم</option>
-              </select>
-            </label>
-            <button id="localeButton" class="compact language-switch" type="button" aria-label="تغییر زبان">EN</button>
-          </div>
-        </div>
-
-        <section class="player-profile" aria-label="پروفایل بازی">
-          <div class="profile-badges">
-            <span id="ageBadge" class="profile-badge">سن ۵–۸</span>
-            <span id="difficultyBadge" class="profile-badge">ساده</span>
-            <span id="boardSizeLabel" class="profile-badge">شبکه ۵×۵</span>
-          </div>
-          <div class="profile-controls">
-            <label><span id="ageText">رده سنی</span><select id="ageSelect"><option value="5-8">۵–۸</option><option value="9-17">۹–۱۷</option><option value="18+">۱۸+</option></select></label>
-            <label><span id="difficultyText">سختی</span><select id="difficultySelect"><option value="easy">ساده</option><option value="medium">متوسط</option><option value="hard">سخت</option></select></label>
-            <button id="loadButton" class="compact" type="button">اعمال</button>
-          </div>
-        </section>
-
-        <section class="mission" aria-live="polite">
-          <span class="mission-kicker" id="missionKicker">هدف مرحله</span>
-          <strong id="statusLabel">قطعه‌ها را بچرخان و مسیر نور را کامل کن.</strong>
-        </section>
-
-        <div class="stats compact-stats" aria-label="آمار مرحله">
-          <span id="stageLabel">مرحله ۱</span>
-          <span id="movesLabel">حرکت: ۰</span>
-          <span id="pulseLabel">پالس: ۰/۱</span>
-          <span id="timerLabel">زمان: ۰۰:۰۰</span>
-          <span id="bestTimeLabel">بهترین: —</span>
-        </div>
-
-        <div class="actions player-actions" aria-label="کنترل‌های بازی">
-          <button id="pulseButton" class="primary">ارسال پالس</button>
-          <button id="hintButton">راهنما −۲۵</button>
-          <button id="undoButton">بازگشت</button>
-          <button id="restartButton">شروع دوباره</button>
-          <button id="nextButton">مرحله بعد</button>
-        </div>
-
-        <details class="advanced-panel">
-          <summary id="advancedSummary">انتخاب فصل و مرحله</summary>
-          <div class="selectors stage-selectors" aria-label="انتخاب مرحله">
-            <label><span id="chapterText">فصل</span><select id="chapterSelect"></select></label>
-            <label><span id="stageText">مرحله</span><input id="stageInput" type="number" min="1" max="1000" value="1" inputmode="numeric" /></label>
-          </div>
-        </details>
+    <main class="world-shell">
+      <header class="world-brand" aria-label="NEYRO">
+        <div class="brand">NEYRO</div>
+        <div class="tagline" id="tagline">هزارتوی ذهن · شبکهٔ نور</div>
       </header>
 
-      <section class="game-card" aria-label="صفحه بازی">
-        <div id="game"></div>
+      <section class="world-topbar" aria-label="تنظیمات بازیکن">
+        <label class="control-card"><span id="ageText">رده سنی</span><select id="ageSelect"><option value="5-8">۵–۸</option><option value="9-17">۹–۱۷</option><option value="18+">۱۸+</option></select></label>
+        <label class="control-card"><span id="difficultyText">سختی</span><select id="difficultySelect"><option value="easy">ساده</option><option value="medium">متوسط</option><option value="hard">سخت</option></select></label>
+        <label class="control-card"><span id="chapterText">فصل</span><select id="chapterSelect"></select></label>
+        <label class="control-card stage-jump"><span id="stageText">مرحله</span><input id="stageInput" type="number" min="1" max="1000" value="1" inputmode="numeric" /></label>
+        <button id="loadButton" class="compact load-stage" type="button">اعمال</button>
+        <label class="control-card theme-control"><span id="themeText">حالت نمایش</span><select id="themeSelect" aria-label="حالت نمایش"><option value="dark">تیره</option><option value="light">روشن</option><option value="system">سیستم</option></select></label>
+        <button id="localeButton" class="compact language-switch" type="button" aria-label="تغییر زبان">EN</button>
       </section>
+
+      <aside class="world-guide panel" aria-label="راهنمای بازی">
+        <div class="panel-title" id="guideTitle">راهنمای بازی</div>
+        <p class="guide-copy" id="guideCopy">کاشی‌ها را بچرخان و مسیر نور را از آغاز تا هدف کامل کن.</p>
+        <div class="mouse-help desktop-only">
+          <div class="mouse-row"><span class="mouse-icon">◀</span><div><strong id="leftClickTitle">کلیک چپ</strong><small id="leftClickCopy">چرخش به چپ (۹۰− درجه)</small></div></div>
+          <div class="mouse-row"><span class="mouse-icon">▶</span><div><strong id="rightClickTitle">کلیک راست</strong><small id="rightClickCopy">چرخش به راست (۹۰+ درجه)</small></div></div>
+        </div>
+        <div class="touch-help"><span>☝</span><div><strong id="touchTitle">موبایل / تبلت</strong><small id="touchCopy">با لمس هر کاشی آن را بچرخان.</small></div></div>
+        <div class="legend-grid" aria-label="راهنمای نمادها">
+          <span><b class="legend start">◆</b><small id="legendStart">شروع</small></span>
+          <span><b class="legend goal">★</b><small id="legendGoal">هدف</small></span>
+          <span><b class="legend">│</b><small id="legendStraight">مسیر مستقیم</small></span>
+          <span><b class="legend">└</b><small id="legendElbow">گوشه</small></span>
+          <span><b class="legend">✕</b><small id="legendBlocker">مسدود</small></span>
+        </div>
+      </aside>
+
+      <section class="world-center">
+        <section class="game-card" aria-label="صفحه بازی"><div id="game"></div></section>
+        <div class="actions player-actions" aria-label="کنترل‌های بازی">
+          <button id="restartButton">شروع دوباره</button>
+          <button id="undoButton">بازگشت</button>
+          <button id="hintButton">راهنما −۲۵</button>
+          <button id="pulseButton" class="primary">ارسال پالس</button>
+          <button id="nextButton">مرحله بعد</button>
+        </div>
+      </section>
+
+      <aside class="world-status panel" aria-label="وضعیت مرحله">
+        <div class="stats hero-stats" aria-label="آمار مرحله">
+          <span id="timerLabel">زمان: ۰۰:۰۰</span>
+          <span id="movesLabel">حرکت: ۰</span>
+          <span id="bestTimeLabel">بهترین: —</span>
+        </div>
+        <section class="mission" aria-live="polite"><span class="mission-kicker" id="missionKicker">هدف مرحله</span><strong id="statusLabel">قطعه‌ها را بچرخان و مسیر نور را کامل کن.</strong></section>
+        <section class="progress-card">
+          <div class="panel-title" id="progressTitle">پیشرفت</div>
+          <strong id="stageLabel">مرحله ۱ · فصل ۱</strong>
+          <div class="progress-track"><i id="progressFill"></i></div>
+          <small id="progressCopy">پیشرفت در این مسیر</small>
+        </section>
+        <section class="track-card">
+          <div class="profile-badges"><span id="ageBadge" class="profile-badge">سن ۵–۸</span><span id="difficultyBadge" class="profile-badge">ساده</span><span id="boardSizeLabel" class="profile-badge">شبکه ۵×۵</span></div>
+          <span id="pulseLabel">پالس: ۰/۱</span>
+        </section>
+        <div class="future-copy" id="futureCopy">چالش امروز، ذهن قوی‌تر فردا</div>
+      </aside>
     </main>
     <script type="module" src="/src/ui-preferences.ts"></script>
     <script type="module" src="/src/main.ts"></script>
