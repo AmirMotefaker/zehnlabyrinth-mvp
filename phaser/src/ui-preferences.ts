@@ -1,4 +1,29 @@
+import Phaser from 'phaser'
+
 export {}
+
+declare module 'phaser' {
+  namespace Input {
+    interface Pointer {
+      readonly pointerType: 'mouse' | 'touch' | 'pen'
+    }
+  }
+}
+
+const pointerPrototype = Phaser.Input.Pointer.prototype as Phaser.Input.Pointer & Record<string, unknown>
+if (!Object.getOwnPropertyDescriptor(pointerPrototype, 'pointerType')) {
+  Object.defineProperty(pointerPrototype, 'pointerType', {
+    configurable: true,
+    get(this: Phaser.Input.Pointer) {
+      const nativeEvent = (this as Phaser.Input.Pointer & { event?: Event }).event
+      if (typeof MouseEvent !== 'undefined' && nativeEvent instanceof MouseEvent) return 'mouse'
+      if (typeof PointerEvent !== 'undefined' && nativeEvent instanceof PointerEvent) {
+        return nativeEvent.pointerType === 'pen' ? 'pen' : nativeEvent.pointerType === 'mouse' ? 'mouse' : 'touch'
+      }
+      return 'touch'
+    }
+  })
+}
 
 type ThemeChoice = 'dark' | 'light' | 'system'
 type Locale = 'fa' | 'en'

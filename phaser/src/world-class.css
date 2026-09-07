@@ -1,0 +1,170 @@
+/* Issue #84 — approved NEYRO world-class game surface */
+
+.world-shell {
+  width:min(1720px,100%);
+  min-height:100svh;
+  margin:0 auto;
+  padding:clamp(10px,1.4vw,24px);
+  display:grid;
+  grid-template-columns:minmax(250px,310px) minmax(620px,1fr) minmax(300px,380px);
+  grid-template-areas:
+    'brand topbar status'
+    'guide center status';
+  gap:16px;
+  align-items:start;
+}
+
+.world-brand { grid-area:brand; padding:8px 8px 2px; }
+.world-brand .brand { font-size:clamp(42px,4vw,68px); letter-spacing:.12em; line-height:.9; }
+.world-brand .tagline { margin-top:10px; font-size:14px; }
+
+.world-topbar {
+  grid-area:topbar;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(120px,1fr)) auto minmax(130px,.8fr) auto;
+  gap:8px;
+  padding:10px;
+  border:1px solid color-mix(in srgb,var(--border) 88%,transparent);
+  border-radius:20px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 92%,transparent),color-mix(in srgb,var(--surface-2) 86%,transparent));
+  box-shadow:0 18px 54px var(--shadow),inset 0 1px 0 color-mix(in srgb,#fff 5%,transparent);
+}
+
+.control-card {
+  min-height:58px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:7px 10px;
+  border:1px solid color-mix(in srgb,var(--border) 74%,transparent);
+  border-radius:13px;
+  background:color-mix(in srgb,var(--surface-2) 82%,transparent);
+}
+.control-card>span { font-size:10px; opacity:.72; font-weight:800; }
+.control-card select,.control-card input { width:100%; min-height:30px; border:0; background:transparent; font-weight:850; color:var(--text); }
+.load-stage,.language-switch { min-width:56px; min-height:58px; }
+
+.panel {
+  border:1px solid color-mix(in srgb,var(--border) 88%,transparent);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--surface) 96%,transparent),color-mix(in srgb,var(--surface-2) 88%,transparent));
+  border-radius:22px;
+  box-shadow:0 22px 68px var(--shadow),inset 0 1px 0 color-mix(in srgb,#fff 5%,transparent);
+}
+.panel-title { font-size:clamp(18px,1.5vw,24px); font-weight:950; }
+
+.world-guide {
+  grid-area:guide;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  min-height:620px;
+}
+.guide-copy { margin:0; line-height:1.85; opacity:.86; }
+.mouse-help,.touch-help { display:grid; gap:10px; }
+.mouse-row,.touch-help {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px;
+  border:1px solid color-mix(in srgb,var(--border) 78%,transparent);
+  border-radius:16px;
+  background:color-mix(in srgb,var(--surface-2) 72%,transparent);
+}
+.mouse-row>div,.touch-help>div { display:flex; flex-direction:column; gap:3px; }
+.mouse-row small,.touch-help small { opacity:.74; line-height:1.55; }
+.mouse-icon,.touch-help>span { width:38px; height:38px; display:grid; place-items:center; border-radius:12px; color:var(--accent); background:color-mix(in srgb,var(--accent) 10%,var(--surface)); font-weight:950; }
+.legend-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:auto; }
+.legend-grid>span { display:flex; align-items:center; gap:8px; min-height:38px; }
+.legend { width:30px; height:30px; display:grid; place-items:center; border-radius:8px; background:var(--surface-2); color:var(--energy); }
+.legend.start { color:var(--accent); }.legend.goal { color:#ffd66b; }
+
+.world-center { grid-area:center; display:flex; flex-direction:column; gap:12px; min-width:0; }
+.world-center .game-card {
+  width:100%;
+  min-height:680px;
+  height:min(74vh,900px);
+  max-width:none;
+  border-radius:24px;
+  padding:0;
+  overflow:hidden;
+}
+.world-center #game,.world-center #game canvas { width:100%!important; height:100%!important; display:block; }
+.world-center .player-actions {
+  position:static;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px;
+  padding:0;
+}
+.world-center .player-actions button { min-height:58px; font-size:13px; }
+.world-center .player-actions .primary { order:-1; }
+
+.world-status {
+  grid-area:status;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  min-height:760px;
+}
+.hero-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.hero-stats span { min-height:68px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:13px; font-weight:900; border:1px solid color-mix(in srgb,var(--border) 76%,transparent); border-radius:14px; background:color-mix(in srgb,var(--surface-2) 72%,transparent); }
+.world-status .mission { margin:0; min-height:104px; }
+.progress-card,.track-card { padding:14px; border:1px solid color-mix(in srgb,var(--border) 74%,transparent); border-radius:16px; background:color-mix(in srgb,var(--surface-2) 68%,transparent); }
+.progress-card { display:flex; flex-direction:column; gap:10px; }
+.progress-track { height:10px; border-radius:999px; overflow:hidden; background:color-mix(in srgb,var(--border) 42%,transparent); }
+.progress-track i { display:block; width:1%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--accent),var(--energy)); box-shadow:0 0 20px var(--glow); transition:width .25s ease; }
+.track-card { display:flex; flex-direction:column; gap:12px; }
+.future-copy { margin-top:auto; padding:18px; border-radius:18px; text-align:center; font-size:clamp(18px,1.5vw,24px); font-weight:950; color:var(--accent); background:radial-gradient(circle at 50% 20%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%); }
+
+/* Age identities affect framing without changing mechanic meaning. */
+body[data-age='5-8'] .panel,body[data-age='5-8'] .world-topbar { border-radius:26px; }
+body[data-age='9-17'] .panel,body[data-age='9-17'] .world-topbar { box-shadow:0 22px 70px var(--shadow),0 0 42px color-mix(in srgb,var(--accent) 7%,transparent); }
+body[data-age='18+'] .panel,body[data-age='18+'] .world-topbar { border-radius:16px; }
+
+@media(max-width:1250px){
+  .world-shell {
+    width:min(1100px,100%);
+    grid-template-columns:minmax(0,1fr) minmax(280px,340px);
+    grid-template-areas:'brand brand' 'topbar topbar' 'center status' 'guide guide';
+  }
+  .world-brand { display:flex; align-items:end; justify-content:space-between; }
+  .world-brand .brand { font-size:44px; }
+  .world-topbar { grid-template-columns:repeat(4,1fr) auto auto; }
+  .theme-control { display:none; }
+  .world-guide { min-height:0; display:grid; grid-template-columns:1.2fr 1fr 1fr; align-items:start; }
+  .legend-grid { margin-top:0; }
+  .world-center .game-card { min-height:620px; }
+}
+
+@media(max-width:820px){
+  .world-shell { display:flex; flex-direction:column; padding:8px; gap:8px; }
+  .world-brand { width:100%; padding:6px 10px; }
+  .world-brand .brand { font-size:32px; }
+  .world-brand .tagline { font-size:10px; }
+  .world-topbar { width:100%; grid-template-columns:repeat(2,1fr) auto; padding:7px; border-radius:16px; }
+  .world-topbar .stage-jump,.world-topbar .theme-control,.world-topbar .load-stage { display:none; }
+  .control-card { min-height:50px; padding:6px 8px; }
+  .world-center { width:100%; }
+  .world-center .game-card { min-height:500px; height:clamp(500px,64svh,720px); border-radius:18px; }
+  .world-center .player-actions {
+    position:fixed; z-index:70; inset-inline:7px; bottom:calc(7px + env(safe-area-inset-bottom));
+    grid-template-columns:1.3fr repeat(3,1fr); padding:7px; border:1px solid var(--border); border-radius:18px; background:color-mix(in srgb,var(--surface) 94%,transparent); backdrop-filter:blur(18px); box-shadow:0 18px 50px var(--shadow);
+  }
+  .world-center .player-actions button { min-height:50px; font-size:10px; padding:5px; }
+  #nextButton { display:none; }
+  .world-status { width:100%; min-height:0; order:3; }
+  .world-guide { width:100%; min-height:0; display:flex; order:4; }
+  .desktop-only { display:none; }
+  .legend-grid { grid-template-columns:repeat(3,1fr); }
+  body { padding-bottom:calc(82px + env(safe-area-inset-bottom)); }
+}
+
+@media(max-width:430px){
+  .world-topbar { grid-template-columns:1fr 1fr auto; }
+  .world-center .game-card { min-height:455px; height:58svh; }
+  .hero-stats span { min-height:54px; font-size:11px; }
+}
+
+@media(prefers-reduced-motion:reduce){ .progress-track i { transition:none; } }
