@@ -41,18 +41,24 @@
     font-size:13px;
   }
 
+  /* Phaser currently renders the board up to a 720px internal square.
+     Keep the play surface close to that scale instead of stretching a huge empty card. */
   .game-card {
-    min-height:760px;
-    height:min(82vh,960px);
+    width:min(980px,100%);
+    min-height:790px;
+    height:min(82vh,930px);
     max-height:none;
+    justify-self:center;
+    margin-inline:auto;
   }
 }
 
 @media (min-width:1400px) {
   .app-shell { width:min(1600px,100%); }
   .game-card {
+    width:min(1040px,100%);
     min-height:820px;
-    height:min(84vh,1020px);
+    height:min(84vh,980px);
   }
 }
 
@@ -112,8 +118,10 @@ body.is-solved .game-card::after {
 /* Tablet: prioritize playfield size without forcing desktop density. */
 @media (min-width:700px) and (max-width:1099px) {
   .game-card {
+    width:min(860px,100%);
     min-height:640px;
     height:min(74vh,840px);
+    margin-inline:auto;
   }
   .compact-stats span { font-size:12px; }
   .player-actions button { min-height:50px; }
@@ -122,6 +130,7 @@ body.is-solved .game-card::after {
 /* Mobile keeps the bottom action bar and protects the board from overflow. */
 @media (max-width:620px) {
   .game-card {
+    width:100%;
     min-height:500px;
     height:clamp(500px,64svh,700px);
   }
