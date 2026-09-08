@@ -11,14 +11,22 @@ const replaceOnce = (text, oldValue, newValue, label) => {
   if (!text.includes(oldValue)) throw new Error(`Anchor not found: ${label}`)
   return text.replace(oldValue, newValue)
 }
-const run = (cmd, args) => execFileSync(cmd, args, { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' })
+const run = (cmd, args) => execFileSync(cmd, args, { cwd: root, stdio: 'inherit' })
 
 const branch = execFileSync('git', ['branch', '--show-current'], { cwd: root, encoding: 'utf8' }).trim()
 if (branch !== 'feat/94-world-viewport-polish') throw new Error(`Wrong branch: ${branch}`)
-if (execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim()) throw new Error('Working tree must be clean.')
 
 console.log('\n=== ISSUE #94 — WORLD VIEWPORT POLISH ===')
 console.log('Main/Production untouched.')
+
+// Allow retry if the previous run already patched the working tree but failed before commit.
+const statusBefore = execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim()
+const expectedDirty = ['phaser/index.html', 'phaser/src/main.ts', 'phaser/src/world-class.css']
+if (statusBefore) {
+  const dirtyPaths = statusBefore.split(/\r?\n/).map(line => line.slice(3).trim()).filter(Boolean)
+  const unexpected = dirtyPaths.filter(p => !expectedDirty.includes(p))
+  if (unexpected.length) throw new Error(`Unexpected dirty files: ${unexpected.join(', ')}`)
+}
 
 // index.html
 let html = read('phaser/index.html')
@@ -61,7 +69,9 @@ write('phaser/src/main.ts', main)
 
 // world-class.css
 let css = read('phaser/src/world-class.css')
-css += `\n\n/* Issue #94 — viewport density, one-screen desktop and brand/footer polish */\n.world-brand .brand-line{display:flex;align-items:center;justify-content:space-between;gap:10px}\n.world-brand .language-switch{min-width:52px;min-height:40px;padding:6px 12px}\n.world-footer{grid-area:footer;text-align:center;font-size:13px;font-weight:800;line-height:1.2;padding:2px 8px 4px;white-space:nowrap}\n.world-footer a{color:#ef4444;text-decoration:none;font-weight:950}\n.world-footer a:hover{text-decoration:underline}\n\n@media (min-width:1251px) and (min-height:700px){\n  html,body{height:100%;overflow:hidden}\n  .world-shell{height:100svh;min-height:0;padding:8px 12px;gap:9px;grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:'brand topbar status' 'guide center status' 'footer footer footer'}\n  .world-brand{padding:4px 6px 0}\n  .world-brand .brand{font-size:clamp(38px,3.3vw,58px)}\n  .world-brand .tagline{margin-top:4px;font-size:13px}\n  .world-topbar{padding:7px;gap:6px;border-radius:16px}\n  .control-card{min-height:50px;padding:5px 8px}\n  .load-stage{min-height:50px}\n  .world-guide,.world-status{height:100%;min-height:0;padding:12px;gap:9px;overflow:hidden}\n  .world-guide .guide-copy{line-height:1.5}\n  .mouse-row,.touch-help{padding:9px}\n  .legend-grid{gap:4px}\n  .legend-grid>span{min-height:31px}\n  .world-center{height:100%;min-height:0;gap:7px}\n  .world-center .game-card{height:auto;min-height:0;flex:1;border-radius:18px}\n  .world-center .player-actions{gap:6px}\n  .world-center .player-actions button{min-height:44px}\n  .world-status .hero-stats span{min-height:52px}\n  .world-status .mission{min-height:78px}\n  .progress-card,.track-card{padding:10px}\n  .future-copy{padding:10px;font-size:17px}\n}\n\n@media(max-width:1250px){\n  .world-footer{width:100%;white-space:normal;padding:10px}\n}\n`
+if (!css.includes('/* Issue #94 — viewport density, one-screen desktop and brand/footer polish */')) {
+  css += `\n\n/* Issue #94 — viewport density, one-screen desktop and brand/footer polish */\n.world-brand .brand-line{display:flex;align-items:center;justify-content:space-between;gap:10px}\n.world-brand .language-switch{min-width:52px;min-height:40px;padding:6px 12px}\n.world-footer{grid-area:footer;text-align:center;font-size:13px;font-weight:800;line-height:1.2;padding:2px 8px 4px;white-space:nowrap}\n.world-footer a{color:#ef4444;text-decoration:none;font-weight:950}\n.world-footer a:hover{text-decoration:underline}\n\n@media (min-width:1251px) and (min-height:700px){\n  html,body{height:100%;overflow:hidden}\n  .world-shell{height:100svh;min-height:0;padding:8px 12px;gap:9px;grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:'brand topbar status' 'guide center status' 'footer footer footer'}\n  .world-brand{padding:4px 6px 0}\n  .world-brand .brand{font-size:clamp(38px,3.3vw,58px)}\n  .world-brand .tagline{margin-top:4px;font-size:13px}\n  .world-topbar{padding:7px;gap:6px;border-radius:16px}\n  .control-card{min-height:50px;padding:5px 8px}\n  .load-stage{min-height:50px}\n  .world-guide,.world-status{height:100%;min-height:0;padding:12px;gap:9px;overflow:hidden}\n  .world-guide .guide-copy{line-height:1.5}\n  .mouse-row,.touch-help{padding:9px}\n  .legend-grid{gap:4px}\n  .legend-grid>span{min-height:31px}\n  .world-center{height:100%;min-height:0;gap:7px}\n  .world-center .game-card{height:auto;min-height:0;flex:1;border-radius:18px}\n  .world-center .player-actions{gap:6px}\n  .world-center .player-actions button{min-height:44px}\n  .world-status .hero-stats span{min-height:52px}\n  .world-status .mission{min-height:78px}\n  .progress-card,.track-card{padding:10px}\n  .future-copy{padding:10px;font-size:17px}\n}\n\n@media(max-width:1250px){\n  .world-footer{width:100%;white-space:normal;padding:10px}\n}\n`
+}
 write('phaser/src/world-class.css', css)
 
 console.log('\n=== PATCHED FILES ===')
