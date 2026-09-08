@@ -1,0 +1,32 @@
+/* Issue #90 — Game Feel v1 */
+.game-card { position:relative; isolation:isolate; }
+.game-card::before {
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:2; opacity:0;
+  background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--accent) 22%,transparent), transparent 58%);
+  transition:opacity .2s ease;
+}
+body.is-pulsing .game-card::before { opacity:1; animation:neyro-energy-breathe .72s ease-in-out infinite alternate; }
+body.is-pulsing #game canvas { animation:neyro-pulse-canvas .7s cubic-bezier(.2,.8,.2,1) infinite alternate; }
+body.rotate-left #game canvas { animation:neyro-rotate-left .18s cubic-bezier(.2,.8,.2,1); }
+body.rotate-right #game canvas { animation:neyro-rotate-right .18s cubic-bezier(.2,.8,.2,1); }
+body.is-pulse-failed .game-card { animation:neyro-failed .24s ease-in-out 2; }
+body.is-solved .game-card { box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--success) 38%,transparent),0 0 50px color-mix(in srgb,var(--success) 22%,transparent),0 22px 60px var(--shadow); }
+body.is-solved #game canvas { animation:neyro-solved-glow 1.25s ease-out both; }
+
+.neyro-celebration { position:absolute; inset:0; z-index:8; pointer-events:none; overflow:hidden; border-radius:inherit; }
+.neyro-celebration::before { content:''; position:absolute; inset:15%; border-radius:50%; border:2px solid var(--success); opacity:0; animation:neyro-ring 1.1s ease-out forwards; }
+.neyro-spark { position:absolute; left:50%; top:50%; width:7px; height:7px; border-radius:50%; background:var(--energy); box-shadow:0 0 12px var(--energy); transform:translate(-50%,-50%); animation:neyro-spark .95s cubic-bezier(.1,.7,.2,1) forwards; }
+
+@keyframes neyro-energy-breathe { from { filter:saturate(1) brightness(1); } to { filter:saturate(1.18) brightness(1.08); } }
+@keyframes neyro-pulse-canvas { from { filter:brightness(1) saturate(1); } to { filter:brightness(1.08) saturate(1.12); } }
+@keyframes neyro-rotate-left { 0%{transform:rotate(0) scale(1)} 45%{transform:rotate(-.35deg) scale(.995)} 100%{transform:rotate(0) scale(1)} }
+@keyframes neyro-rotate-right { 0%{transform:rotate(0) scale(1)} 45%{transform:rotate(.35deg) scale(.995)} 100%{transform:rotate(0) scale(1)} }
+@keyframes neyro-failed { 0%,100%{transform:translateX(0)} 50%{transform:translateX(3px)} }
+@keyframes neyro-solved-glow { 0%{filter:brightness(1)} 45%{filter:brightness(1.22) saturate(1.18)} 100%{filter:brightness(1.06)} }
+@keyframes neyro-ring { 0%{transform:scale(.35);opacity:.75} 100%{transform:scale(1.5);opacity:0} }
+@keyframes neyro-spark { 0%{opacity:1;transform:translate(-50%,-50%) scale(.6)} 100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.25)} }
+
+@media(prefers-reduced-motion:reduce){
+  body.is-pulsing .game-card::before,body.is-pulsing #game canvas,body.rotate-left #game canvas,body.rotate-right #game canvas,body.is-pulse-failed .game-card,body.is-solved #game canvas,.neyro-celebration::before,.neyro-spark { animation:none!important; }
+  body.is-pulsing .game-card::before { opacity:.22; }
+}
