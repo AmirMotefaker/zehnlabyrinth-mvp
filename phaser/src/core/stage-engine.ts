@@ -217,11 +217,15 @@ function fingerprintFor(stage: Omit<StageDefinition, 'fingerprint'>): string {
   return variants.sort()[0]
 }
 
-export function generateStage(track: TrackDefinition, stageNumber: number): StageDefinition {
+export function generateStage(track: TrackDefinition, stageNumber: number, requestedBoardSize?: number): StageDefinition {
   if (!Number.isInteger(stageNumber) || stageNumber < 1 || stageNumber > STAGES_PER_TRACK) throw new Error(`stageNumber must be 1..${STAGES_PER_TRACK}`)
   const chapter = Math.floor((stageNumber - 1) / STAGES_PER_CHAPTER) + 1
   const stageInChapter = ((stageNumber - 1) % STAGES_PER_CHAPTER) + 1
-  const stageTrack: TrackDefinition = { ...track, boardSize: boardSizeFor(track, chapter) }
+  const canonicalBoardSize = boardSizeFor(track, chapter)
+  const selectedBoardSize = requestedBoardSize == null
+    ? canonicalBoardSize
+    : Math.min(50, Math.max(3, Math.round(requestedBoardSize)))
+  const stageTrack: TrackDefinition = { ...track, boardSize: selectedBoardSize }
   const seed = hashString(`neyro-v3|${track.id}|${stageNumber}|${stageTrack.boardSize}`)
   const random = mulberry32(seed)
   const path = monotonicPath(stageTrack.boardSize, random)

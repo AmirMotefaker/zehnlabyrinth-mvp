@@ -27,7 +27,7 @@ const ARROW: Record<Direction, string> = { N: '↑', E: '→', S: '↓', W: '←
 
 const copy = {
   fa: {
-    tagline: 'هزارتوی ذهن · شبکهٔ نور', age: 'رده سنی', difficulty: 'سختی', chapter: 'فصل', stage: 'مرحله',
+    tagline: 'هزارتوی ذهن · شبکهٔ نور', age: 'رده سنی', difficulty: 'سختی', chapter: 'فصل', stage: 'مرحله', boardSize: 'اندازه صفحه',
     load: 'اعمال', easy: 'ساده', medium: 'متوسط', hard: 'سخت', pulse: 'ارسال پالس', hint: 'راهنما −۲۵', undo: 'بازگشت', restart: 'شروع دوباره', next: 'مرحله بعد',
     ready: 'قطعه‌ها را بچرخان و مسیر نور را کامل کن.', rotatedLeft: 'کاشی ۹۰ درجه به چپ چرخید.', rotatedRight: 'کاشی ۹۰ درجه به راست چرخید.', sending: 'پالس در شبکه حرکت می‌کند…',
     failed: 'پالس متوقف شد؛ اتصال بعدی شبکه را اصلاح کن.', charging: 'پالس ثبت شد؛ شبکه برای پالس بعدی شارژ شد.', solved: 'عالی! ستاره روشن شد و مرحله کامل است.',
@@ -37,7 +37,7 @@ const copy = {
     guideTitle: 'راهنمای بازی', guideCopy: 'کاشی‌ها را بچرخان و مسیر نور را از آغاز تا هدف کامل کن.', leftClickTitle: 'کلیک چپ', leftClickCopy: 'چرخش به چپ (۹۰− درجه)', rightClickTitle: 'کلیک راست', rightClickCopy: 'چرخش به راست (۹۰+ درجه)', touchTitle: 'موبایل / تبلت', touchCopy: 'با لمس هر کاشی آن را بچرخان.', progressTitle: 'پیشرفت', progressCopy: 'پیشرفت در این مسیر', futureCopy: 'چالش امروز، ذهن قوی‌تر فردا', legendStart: 'شروع', legendGoal: 'هدف', legendStraight: 'مسیر مستقیم', legendElbow: 'گوشه', legendBlocker: 'مسدود'
   },
   en: {
-    tagline: 'Mind Labyrinth · Living Light Network', age: 'Age', difficulty: 'Difficulty', chapter: 'Chapter', stage: 'Stage',
+    tagline: 'Mind Labyrinth · Living Light Network', age: 'Age', difficulty: 'Difficulty', chapter: 'Chapter', stage: 'Stage', boardSize: 'Board size',
     load: 'Apply', easy: 'Easy', medium: 'Medium', hard: 'Hard', pulse: 'Send pulse', hint: 'Hint −25', undo: 'Undo', restart: 'Restart', next: 'Next stage',
     ready: 'Rotate the nodes and complete the light path.', rotatedLeft: 'Tile rotated 90° left.', rotatedRight: 'Tile rotated 90° right.', sending: 'Pulse travelling through the network…', failed: 'Pulse stopped. Repair the next network connection.', charging: 'Pulse stored. The network is charged for the next pulse.', solved: 'Great! The star is lit and the stage is complete.', hintDone: 'One route node was corrected. Hint penalty: 25.', hintNone: 'The route rotations are correct. Send the pulse.', noUndo: 'There is no move to undo.', phaseClosed: 'The phase gate is still closed. Prepare the next pulse.', relayOrder: 'Relays must be activated in the correct order.', relayMissing: 'Not all required relays are charged yet.', locked: 'Finish the current stage first to unlock the next one.',
     tutorial1: 'Tutorial 1 of 3: start at the cyan diamond. Rotate the highlighted tile and build the route toward the star.', tutorial2: 'Tutorial 2 of 3: ↻ marks a rotatable tile. Complete the lit route from start to star.', tutorial3: 'Tutorial 3 of 3: complete the route yourself. Hint reveals one correct move if you get stuck.', tutorialPulse: 'The route is ready. Press Send pulse.',
@@ -54,6 +54,7 @@ class NeyroScene extends Phaser.Scene {
   private locale: Locale = (localStorage.getItem('neyro.locale') as Locale) || 'fa'
   private ageBand: AgeBand = (localStorage.getItem('neyro.age') as AgeBand) || '5-8'
   private difficulty: Difficulty = (localStorage.getItem('neyro.difficulty') as Difficulty) || 'easy'
+  private boardSizeOverride = Math.min(50, Math.max(3, Number(localStorage.getItem('neyro.boardSize') || 0)))
   private tutorialComplete = localStorage.getItem('neyro.tutorialComplete') === '1'
   private stageNumber = this.tutorialComplete ? Math.min(STAGES_PER_TRACK, Math.max(1, Number(localStorage.getItem('neyro.stage') || 1))) : 1
   private stage!: StageDefinition
@@ -87,6 +88,13 @@ class NeyroScene extends Phaser.Scene {
       chapterSelect.append(option)
     }
     const stageInput = el<HTMLInputElement>('#stageInput')
+    const boardSizeSelect = el<HTMLSelectElement>('#boardSizeSelect')
+    boardSizeSelect.replaceChildren()
+    for (let size = 3; size <= 50; size += 1) {
+      const option = document.createElement('option')
+      option.value = String(size)
+      boardSizeSelect.append(option)
+    }
     stageInput.max = String(STAGES_PER_TRACK)
 
     el<HTMLButtonElement>('#pulseButton').onclick = () => void this.sendPulse()
@@ -101,6 +109,8 @@ class NeyroScene extends Phaser.Scene {
       if (this.pulsing) return
       this.ageBand = el<HTMLSelectElement>('#ageSelect').value as AgeBand
       this.difficulty = el<HTMLSelectElement>('#difficultySelect').value as Difficulty
+      this.boardSizeOverride = Number(boardSizeSelect.value)
+      localStorage.setItem('neyro.boardSize', String(this.boardSizeOverride))
       const requested = Math.min(STAGES_PER_TRACK, Math.max(1, Number(stageInput.value) || 1))
       this.loadStage(Math.min(requested, this.highestUnlocked()))
     }
@@ -139,7 +149,7 @@ class NeyroScene extends Phaser.Scene {
     if (this.pulsing) return
     const allowed = this.tutorialComplete ? this.highestUnlocked() : Math.min(3, this.highestUnlocked())
     this.stageNumber = Math.min(number, allowed)
-    this.stage = generateStage(this.currentTrack(), this.stageNumber)
+    this.stage = generateStage(this.currentTrack(), this.stageNumber, this.boardSizeOverride || undefined)
     this.moves = 0; this.hints = 0; this.pulseCount = 0; this.solved = false; this.reached.clear(); this.undoStack = []
     this.rotations = {}
     this.stage.grid.forEach((row, r) => row.forEach((tile, c) => {
@@ -195,6 +205,7 @@ class NeyroScene extends Phaser.Scene {
     el<HTMLSelectElement>('#ageSelect').disabled = locked
     el<HTMLSelectElement>('#difficultySelect').disabled = locked
     el<HTMLSelectElement>('#chapterSelect').disabled = locked
+    el<HTMLSelectElement>('#boardSizeSelect').disabled = locked
     el<HTMLInputElement>('#stageInput').disabled = locked
     this.updateNextState()
   }
@@ -286,7 +297,7 @@ class NeyroScene extends Phaser.Scene {
     document.documentElement.lang = this.locale
     document.documentElement.dir = this.locale === 'fa' ? 'rtl' : 'ltr'
     const values: Record<string, string> = {
-      '#tagline': c.tagline, '#ageText': c.age, '#difficultyText': c.difficulty, '#chapterText': c.chapter, '#stageText': c.stage,
+      '#tagline': c.tagline, '#ageText': c.age, '#difficultyText': c.difficulty, '#chapterText': c.chapter, '#stageText': c.stage, '#boardSizeText': c.boardSize,
       '#guideTitle': c.guideTitle, '#guideCopy': c.guideCopy, '#leftClickTitle': c.leftClickTitle, '#leftClickCopy': c.leftClickCopy,
       '#rightClickTitle': c.rightClickTitle, '#rightClickCopy': c.rightClickCopy, '#touchTitle': c.touchTitle, '#touchCopy': c.touchCopy,
       '#progressTitle': c.progressTitle, '#progressCopy': c.progressCopy, '#futureCopy': c.futureCopy,
@@ -303,8 +314,14 @@ class NeyroScene extends Phaser.Scene {
     const difficulty = el<HTMLSelectElement>('#difficultySelect').options
     difficulty[0].text = c.easy; difficulty[1].text = c.medium; difficulty[2].text = c.hard
     for (let i = 0; i < CHAPTERS_PER_TRACK; i += 1) el<HTMLSelectElement>('#chapterSelect').options[i].text = `${c.chapter} ${digits(i + 1, this.locale)}`
+    const boardSizeSelect = el<HTMLSelectElement>('#boardSizeSelect')
+    Array.from(boardSizeSelect.options).forEach(option => {
+      const n = Number(option.value)
+      option.text = `${digits(n, this.locale)}×${digits(n, this.locale)}`
+    })
     el<HTMLSelectElement>('#ageSelect').value = this.ageBand
     el<HTMLSelectElement>('#difficultySelect').value = this.difficulty
+    boardSizeSelect.value = String(this.boardSizeOverride || this.stage?.track.boardSize || 4)
     el<HTMLInputElement>('#stageInput').value = String(this.stageNumber)
     el<HTMLSelectElement>('#chapterSelect').value = String(this.stage?.chapter ?? 1)
   }
