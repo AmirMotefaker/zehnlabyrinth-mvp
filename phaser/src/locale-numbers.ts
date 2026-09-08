@@ -1,3 +1,5 @@
+export {}
+
 const FA = '۰۱۲۳۴۵۶۷۸۹'
 const AR = '٠١٢٣٤٥٦٧٨٩'
 
