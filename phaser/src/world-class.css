@@ -185,3 +185,38 @@ body[data-age='18+'] .panel,body[data-age='18+'] .world-topbar { border-radius:1
     display: flex;
   }
 }
+
+/* Issue #94 — viewport density, one-screen desktop and brand/footer polish */
+.world-brand .brand-line{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.world-brand .language-switch{min-width:52px;min-height:40px;padding:6px 12px}
+.world-footer{grid-area:footer;text-align:center;font-size:13px;font-weight:800;line-height:1.2;padding:2px 8px 4px;white-space:nowrap}
+.world-footer a{color:#ef4444;text-decoration:none;font-weight:950}
+.world-footer a:hover{text-decoration:underline}
+
+@media (min-width:1251px) and (min-height:700px){
+  html,body{height:100%;overflow:hidden}
+  .world-shell{height:100svh;min-height:0;padding:8px 12px;gap:9px;grid-template-rows:auto minmax(0,1fr) auto;grid-template-areas:'brand topbar status' 'guide center status' 'footer footer footer'}
+  .world-brand{padding:4px 6px 0}
+  .world-brand .brand{font-size:clamp(38px,3.3vw,58px)}
+  .world-brand .tagline{margin-top:4px;font-size:13px}
+  .world-topbar{padding:7px;gap:6px;border-radius:16px}
+  .control-card{min-height:50px;padding:5px 8px}
+  .load-stage{min-height:50px}
+  .world-guide,.world-status{height:100%;min-height:0;padding:12px;gap:9px;overflow:hidden}
+  .world-guide .guide-copy{line-height:1.5}
+  .mouse-row,.touch-help{padding:9px}
+  .legend-grid{gap:4px}
+  .legend-grid>span{min-height:31px}
+  .world-center{height:100%;min-height:0;gap:7px}
+  .world-center .game-card{height:auto;min-height:0;flex:1;border-radius:18px}
+  .world-center .player-actions{gap:6px}
+  .world-center .player-actions button{min-height:44px}
+  .world-status .hero-stats span{min-height:52px}
+  .world-status .mission{min-height:78px}
+  .progress-card,.track-card{padding:10px}
+  .future-copy{padding:10px;font-size:17px}
+}
+
+@media(max-width:1250px){
+  .world-footer{width:100%;white-space:normal;padding:10px}
+}
