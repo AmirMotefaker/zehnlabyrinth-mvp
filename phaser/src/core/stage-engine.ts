@@ -44,8 +44,8 @@ export interface StageValidation {
 
 export const AGE_BANDS: AgeBand[] = ['5-8', '9-17', '18+']
 export const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
-export const STAGES_PER_TRACK = 10000
-export const CHAPTERS_PER_TRACK = 20
+export const STAGES_PER_TRACK = 25000
+export const CHAPTERS_PER_TRACK = 50
 export const STAGES_PER_CHAPTER = STAGES_PER_TRACK / CHAPTERS_PER_TRACK
 export const TOTAL_TRACKS = AGE_BANDS.length * DIFFICULTIES.length
 export const TOTAL_STAGES = TOTAL_TRACKS * STAGES_PER_TRACK
