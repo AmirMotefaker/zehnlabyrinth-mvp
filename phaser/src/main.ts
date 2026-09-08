@@ -27,20 +27,20 @@ const ARROW: Record<Direction, string> = { N: '↑', E: '→', S: '↓', W: '←
 
 const copy = {
   fa: {
-    tagline: 'هزارتوی ذهن · شبکهٔ نور', age: 'رده سنی', difficulty: 'سختی', chapter: 'فصل', stage: 'مرحله', boardSize: 'اندازه صفحه',
+    tagline: 'هزارتوی ذهن', age: 'رده سنی', difficulty: 'سختی', chapter: 'فصل', stage: 'مرحله', boardSize: 'اندازه صفحه',
     load: 'اعمال', easy: 'ساده', medium: 'متوسط', hard: 'سخت', pulse: 'ارسال پالس', hint: 'راهنما −۲۵', undo: 'بازگشت', restart: 'شروع دوباره', next: 'مرحله بعد',
     ready: 'قطعه‌ها را بچرخان و مسیر نور را کامل کن.', rotatedLeft: 'کاشی ۹۰ درجه به چپ چرخید.', rotatedRight: 'کاشی ۹۰ درجه به راست چرخید.', sending: 'پالس در شبکه حرکت می‌کند…',
     failed: 'پالس متوقف شد؛ اتصال بعدی شبکه را اصلاح کن.', charging: 'پالس ثبت شد؛ شبکه برای پالس بعدی شارژ شد.', solved: 'عالی! ستاره روشن شد و مرحله کامل است.',
     hintDone: 'یک قطعهٔ مسیر اصلاح شد؛ ۲۵ امتیاز از پاداش کم می‌شود.', hintNone: 'چرخش مسیر درست است؛ پالس را ارسال کن.', noUndo: 'حرکتی برای بازگشت وجود ندارد.',
     phaseClosed: 'دروازه فاز هنوز بسته است؛ پالس بعدی را آماده کن.', relayOrder: 'رله‌ها باید به ترتیب صحیح فعال شوند.', relayMissing: 'همهٔ رله‌های لازم هنوز شارژ نشده‌اند.', locked: 'ابتدا مرحله فعلی را کامل کن تا مرحله بعد باز شود.',
-    tutorial1: 'آموزش ۱ از ۳: از لوزی فیروزه‌ای شروع کن. کاشی مشخص‌شده را بچرخان و مسیر را به سمت ستاره بساز.', tutorial2: 'آموزش ۲ از ۳: ↻ یعنی کاشی قابل چرخش است. مسیر روشن را از آغاز تا ستاره کامل کن.', tutorial3: 'آموزش ۳ از ۳: مسیر را خودت کامل کن؛ اگر گیر کردی «راهنما» یک حرکت درست را نشان می‌دهد.', tutorialPulse: 'مسیر آماده است؛ حالا «ارسال پالس» را بزن.',
+    tutorial1: 'آموزش ۱ از ۳: از لوزی فیروزه‌ای شروع کن. کاشی مشخص‌شده را بچرخان و مسیر را به سمت ستاره بساز.', tutorial2: 'آموزش ۲ از ۳: کاشی‌های مسیر قابل چرخش هستند. مسیر روشن را از آغاز تا ستاره کامل کن.', tutorial3: 'آموزش ۳ از ۳: مسیر را خودت کامل کن؛ اگر گیر کردی «راهنما» یک حرکت درست را نشان می‌دهد.', tutorialPulse: 'مسیر آماده است؛ حالا «ارسال پالس» را بزن.',
     guideTitle: 'راهنمای بازی', guideCopy: 'کاشی‌ها را بچرخان و مسیر نور را از آغاز تا هدف کامل کن.', leftClickTitle: 'کلیک چپ', leftClickCopy: 'چرخش به چپ (۹۰− درجه)', rightClickTitle: 'کلیک راست', rightClickCopy: 'چرخش به راست (۹۰+ درجه)', touchTitle: 'موبایل / تبلت', touchCopy: 'با لمس هر کاشی آن را بچرخان.', progressTitle: 'پیشرفت', progressCopy: 'پیشرفت در این مسیر', futureCopy: 'چالش امروز، ذهن قوی‌تر فردا', legendStart: 'شروع', legendGoal: 'هدف', legendStraight: 'مسیر مستقیم', legendElbow: 'گوشه', legendBlocker: 'مسدود'
   },
   en: {
-    tagline: 'Mind Labyrinth · Living Light Network', age: 'Age', difficulty: 'Difficulty', chapter: 'Chapter', stage: 'Stage', boardSize: 'Board size',
+    tagline: 'Mind Labyrinth', age: 'Age', difficulty: 'Difficulty', chapter: 'Chapter', stage: 'Stage', boardSize: 'Board size',
     load: 'Apply', easy: 'Easy', medium: 'Medium', hard: 'Hard', pulse: 'Send pulse', hint: 'Hint −25', undo: 'Undo', restart: 'Restart', next: 'Next stage',
     ready: 'Rotate the nodes and complete the light path.', rotatedLeft: 'Tile rotated 90° left.', rotatedRight: 'Tile rotated 90° right.', sending: 'Pulse travelling through the network…', failed: 'Pulse stopped. Repair the next network connection.', charging: 'Pulse stored. The network is charged for the next pulse.', solved: 'Great! The star is lit and the stage is complete.', hintDone: 'One route node was corrected. Hint penalty: 25.', hintNone: 'The route rotations are correct. Send the pulse.', noUndo: 'There is no move to undo.', phaseClosed: 'The phase gate is still closed. Prepare the next pulse.', relayOrder: 'Relays must be activated in the correct order.', relayMissing: 'Not all required relays are charged yet.', locked: 'Finish the current stage first to unlock the next one.',
-    tutorial1: 'Tutorial 1 of 3: start at the cyan diamond. Rotate the highlighted tile and build the route toward the star.', tutorial2: 'Tutorial 2 of 3: ↻ marks a rotatable tile. Complete the lit route from start to star.', tutorial3: 'Tutorial 3 of 3: complete the route yourself. Hint reveals one correct move if you get stuck.', tutorialPulse: 'The route is ready. Press Send pulse.',
+    tutorial1: 'Tutorial 1 of 3: start at the cyan diamond. Rotate the highlighted tile and build the route toward the star.', tutorial2: 'Tutorial 2 of 3: route tiles can be rotated. Complete the lit route from start to star.', tutorial3: 'Tutorial 3 of 3: complete the route yourself. Hint reveals one correct move if you get stuck.', tutorialPulse: 'The route is ready. Press Send pulse.',
     guideTitle: 'How to play', guideCopy: 'Rotate tiles and complete the light path from start to goal.', leftClickTitle: 'Left click', leftClickCopy: 'Rotate left (−90°)', rightClickTitle: 'Right click', rightClickCopy: 'Rotate right (+90°)', touchTitle: 'Mobile / tablet', touchCopy: 'Tap a rotatable tile to turn it.', progressTitle: 'Progress', progressCopy: 'Progress on this track', futureCopy: 'Stronger mind, one challenge at a time', legendStart: 'Start', legendGoal: 'Goal', legendStraight: 'Straight', legendElbow: 'Elbow', legendBlocker: 'Blocked'
   }
 } as const
@@ -75,8 +75,35 @@ class NeyroScene extends Phaser.Scene {
   create() {
     this.game.canvas.addEventListener('contextmenu', event => event.preventDefault())
     this.bindControls()
+    this.bindLargeBoardNavigation()
     this.scale.on('resize', () => this.drawBoard())
     this.loadStage(this.stageNumber)
+  }
+
+  private bindLargeBoardNavigation() {
+    const camera = this.cameras.main
+    let dragging = false
+    let lastX = 0
+    let lastY = 0
+
+    this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _objects: Phaser.GameObjects.GameObject[], _dx: number, dy: number) => {
+      if ((this.stage?.track.boardSize ?? 0) < 12) return
+      camera.setZoom(Phaser.Math.Clamp(camera.zoom - dy * 0.0012, 0.55, 2.4))
+    })
+
+    this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+      if ((this.stage?.track.boardSize ?? 0) < 12) return
+      if (pointer.middleButtonDown() || pointer.event.shiftKey) { dragging = true; lastX = pointer.x; lastY = pointer.y }
+    })
+    this.input.on('pointerup', () => { dragging = false })
+    this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+      if (!dragging) return
+      const dx = (pointer.x - lastX) / camera.zoom
+      const dy = (pointer.y - lastY) / camera.zoom
+      camera.scrollX -= dx
+      camera.scrollY -= dy
+      lastX = pointer.x; lastY = pointer.y
+    })
   }
 
   private bindControls() {
@@ -339,7 +366,23 @@ class NeyroScene extends Phaser.Scene {
     this.board?.destroy(true); this.board = this.add.container(0, 0)
     const w = this.scale.width, h = this.scale.height, n = this.stage.track.boardSize
     const cap = w >= 1100 ? 820 : 720
-    const size = Math.min(w * .94, h * .92, cap), step = size / n, left = (w - size) / 2, top = (h - size) / 2
+    const viewportSize = Math.min(w * .94, h * .92, cap)
+    const minimumStep = n >= 30 ? 28 : n >= 20 ? 31 : n >= 12 ? 35 : 0
+    const step = Math.max(viewportSize / n, minimumStep)
+    const size = step * n
+    const left = size <= w ? (w - size) / 2 : 28
+    const top = size <= h ? (h - size) / 2 : 28
+    const camera = this.cameras.main
+    const largeBoard = size > w || size > h
+    camera.setBounds(0, 0, Math.max(w, size + 56), Math.max(h, size + 56))
+    if (!largeBoard) {
+      camera.setZoom(1)
+      camera.centerOn(w / 2, h / 2)
+    } else {
+      const fitZoom = Phaser.Math.Clamp(Math.min(w / (size + 56), h / (size + 56)) * 1.18, .55, 1)
+      if (camera.zoom === 1) camera.setZoom(fitZoom)
+      camera.centerOn(left + size / 2, top + size / 2)
+    }
     const panel = this.add.graphics(); panel.fillStyle(0x071422, 1); panel.lineStyle(2, 0x1f5a73, 1); panel.fillRoundedRect(left - 14, top - 14, size + 28, size + 28, 24); panel.strokeRoundedRect(left - 14, top - 14, size + 28, size + 28, 24); this.board.add(panel)
     const tutorial = !this.tutorialComplete && this.stageNumber <= 3
     const target = this.tutorialTarget(); const targetKey = target ? keyOf(target.row, target.col) : undefined
@@ -376,7 +419,6 @@ class NeyroScene extends Phaser.Scene {
         pipe.beginPath(); for (const direction of this.ports(tile, rotation)) { const d = DELTA[direction]; pipe.moveTo(x,y); pipe.lineTo(x+d.col*len,y+d.row*len) } pipe.strokePath()
       }
       this.board!.add(pipe)
-      if (this.isRotatable(tile)) this.board!.add(this.add.text(x + cell * .27, y - cell * .27, '↻', { fontFamily: 'system-ui', fontSize: `${Math.max(12, cell * .18)}px`, color: isTarget ? '#ffd45c' : '#86b7d7', fontStyle: 'bold' }).setOrigin(.5).setAlpha(tutorialDim ? .18 : .9))
       if (this.isRotatable(tile) && !this.pulsing && !tutorialDim) {
         const hit = this.add.zone(x, y, cell, cell).setInteractive({ useHandCursor: true })
         hit.on('pointerdown', (pointer: Phaser.Input.Pointer) => {

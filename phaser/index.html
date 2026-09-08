@@ -14,8 +14,8 @@
   <body data-age="5-8" data-difficulty="easy" data-theme="dark">
     <main class="world-shell">
       <header class="world-brand" aria-label="NEYRO">
-        <div class="brand">NEYRO</div>
-        <div class="tagline" id="tagline">هزارتوی ذهن · شبکهٔ نور</div>
+        <div class="brand-line"><div class="brand">NEYRO</div><button id="localeButton" class="compact language-switch" type="button" aria-label="تغییر زبان">EN</button></div>
+        <div class="tagline" id="tagline">هزارتوی ذهن</div>
       </header>
 
       <section class="world-topbar" aria-label="تنظیمات بازیکن">
@@ -26,7 +26,6 @@
         <label class="control-card stage-jump"><span id="stageText">مرحله</span><input id="stageInput" type="text" value="۱" inputmode="numeric" pattern="[0-9۰-۹٠-٩]*" autocomplete="off" aria-label="شماره مرحله" /></label>
         <button id="loadButton" class="compact load-stage" type="button">اعمال</button>
         <label class="control-card theme-control"><span id="themeText">حالت نمایش</span><select id="themeSelect" aria-label="حالت نمایش"><option value="dark">تیره</option><option value="light">روشن</option><option value="system">سیستم</option></select></label>
-        <button id="localeButton" class="compact language-switch" type="button" aria-label="تغییر زبان">EN</button>
       </section>
 
       <aside class="world-guide panel" aria-label="راهنمای بازی">
@@ -76,6 +75,8 @@
         </section>
         <div class="future-copy" id="futureCopy">چالش امروز، ذهن قوی‌تر فردا</div>
       </aside>
+
+      <footer class="world-footer">ساخته شده با ❤️ برای گیمرهای حرفه ای توسط <a href="https://amirmotefaker.ir/" target="_blank" rel="noopener noreferrer">امیر متفکر</a></footer>
     </main>
     <script type="module" src="/src/ui-preferences.ts"></script>
     <script type="module" src="/src/premium-ui.ts"></script>
