@@ -19,7 +19,7 @@ if (branch !== 'feat/94-world-viewport-polish') throw new Error(`Wrong branch: $
 console.log('\n=== ISSUE #94 — WORLD VIEWPORT POLISH ===')
 console.log('Main/Production untouched.')
 
-// Allow retry if the previous run already patched the working tree but failed before commit.
+// Allow retry if the previous run already patched/staged the expected Issue #94 files.
 const statusBefore = execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim()
 const expectedDirty = ['phaser/index.html', 'phaser/src/main.ts', 'phaser/src/world-class.css']
 if (statusBefore) {
