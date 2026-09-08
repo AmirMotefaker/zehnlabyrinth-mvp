@@ -1,0 +1,52 @@
+/* Issue #88 — keep native select popups readable in every resolved theme. */
+select {
+  color: var(--text);
+  background-color: var(--surface-2);
+  border-color: var(--border);
+}
+
+select option,
+select optgroup {
+  color: var(--text);
+  background-color: var(--surface-2);
+  font-family: 'Vazirmatn', Tahoma, Arial, sans-serif;
+}
+
+body[data-theme='dark'] select {
+  color-scheme: dark;
+}
+body[data-theme='dark'] select option,
+body[data-theme='dark'] select optgroup {
+  color: #f5f8ff;
+  background-color: #102238;
+}
+body[data-theme='dark'] select option:disabled {
+  color: #7f98b5;
+}
+
+body[data-theme='light'] select {
+  color-scheme: light;
+}
+body[data-theme='light'] select option,
+body[data-theme='light'] select optgroup {
+  color: #162535;
+  background-color: #ffffff;
+}
+body[data-theme='light'] select option:disabled {
+  color: #7b8794;
+}
+
+/* Chromium/Edge native popup selected rows keep readable foregrounds. */
+body[data-theme='dark'] select option:checked {
+  color: #ffffff;
+  background: #29466c linear-gradient(0deg, #29466c 0%, #29466c 100%);
+}
+body[data-theme='light'] select option:checked {
+  color: #102030;
+  background: #dbe9f2 linear-gradient(0deg, #dbe9f2 0%, #dbe9f2 100%);
+}
+
+select:focus-visible {
+  color: var(--text);
+  background-color: var(--surface-2);
+}
