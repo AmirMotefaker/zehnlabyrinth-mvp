@@ -13,7 +13,6 @@ const replaceOnce = (text, oldValue, newValue, label) => {
 }
 const run = (cmd, args) => execFileSync(cmd, args, { cwd: root, stdio: 'inherit', shell: process.platform === 'win32' })
 
-if (run('git', ['branch', '--show-current']).toString) {}
 const branch = execFileSync('git', ['branch', '--show-current'], { cwd: root, encoding: 'utf8' }).trim()
 if (branch !== 'feat/94-world-viewport-polish') throw new Error(`Wrong branch: ${branch}`)
 if (execFileSync('git', ['status', '--porcelain'], { cwd: root, encoding: 'utf8' }).trim()) throw new Error('Working tree must be clean.')
