@@ -24,7 +24,10 @@ Write-Host 'Main/Production untouched.' -ForegroundColor Green
 # index.html
 $html = Get-Content $index -Raw -Encoding UTF8
 $old = '<label class="control-card"><span id="chapterText">فصل</span><select id="chapterSelect"></select></label>'
-$new = $old + "`n        <label class=\"control-card board-size-control\"><span id=\"boardSizeText\">اندازه صفحه</span><select id=\"boardSizeSelect\" aria-label=\"اندازه صفحه\"></select></label>"
+$new = @'
+<label class="control-card"><span id="chapterText">فصل</span><select id="chapterSelect"></select></label>
+        <label class="control-card board-size-control"><span id="boardSizeText">اندازه صفحه</span><select id="boardSizeSelect" aria-label="اندازه صفحه"></select></label>
+'@.TrimEnd()
 if (-not $html.Contains('id="boardSizeSelect"')) { $html = Replace-Once $html $old $new 'index board-size control' }
 Set-Content $index $html -Encoding UTF8 -NoNewline
 
@@ -97,12 +100,17 @@ $oldValues = "'#tagline': c.tagline, '#ageText': c.age, '#difficultyText': c.dif
 $newValues = "'#tagline': c.tagline, '#ageText': c.age, '#difficultyText': c.difficulty, '#chapterText': c.chapter, '#stageText': c.stage, '#boardSizeText': c.boardSize,"
 if (-not $src.Contains("'#boardSizeText': c.boardSize")) { $src = Replace-Once $src $oldValues $newValues 'locale board-size label' }
 
-$oldChapters = "    for (let i = 0; i < CHAPTERS_PER_TRACK; i += 1) el<HTMLSelectElement>('#chapterSelect').options[i].text = `${c.chapter} `${digits(i + 1, this.locale)}`"
-# Avoid PowerShell interpolation by finding a stable exact line from source at runtime.
 $chapterLine = ($src -split "`n" | Where-Object { $_ -match 'CHAPTERS_PER_TRACK.*chapterSelect.*options\[i\]\.text' } | Select-Object -First 1)
 if (-not $chapterLine) { throw 'Anchor not found: chapter option localization' }
 if (-not $src.Contains('Array.from(boardSizeSelect.options)')) {
-  $block = $chapterLine + "`n    const boardSizeSelect = el<HTMLSelectElement>('#boardSizeSelect')`n    Array.from(boardSizeSelect.options).forEach(option => {`n      const n = Number(option.value)`n      option.text = `${digits(n, this.locale)}×`${digits(n, this.locale)}``n    })"
+  $boardLocalize = @'
+    const boardSizeSelect = el<HTMLSelectElement>('#boardSizeSelect')
+    Array.from(boardSizeSelect.options).forEach(option => {
+      const n = Number(option.value)
+      option.text = `${digits(n, this.locale)}×${digits(n, this.locale)}`
+    })
+'@.TrimEnd()
+  $block = $chapterLine + "`n" + $boardLocalize
   $src = Replace-Once $src $chapterLine $block 'board-size option localization'
 }
 
