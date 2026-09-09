@@ -261,7 +261,7 @@ class NeyroScene extends Phaser.Scene {
     el<HTMLSelectElement>('#difficultySelect').disabled = locked
     el<HTMLSelectElement>('#chapterSelect').disabled = locked
     el<HTMLSelectElement>('#boardSizeSelect').disabled = locked
-    el<HTMLInputElement>('#stageInput').disabled = locked
+    el<HTMLSelectElement>('#stageSelect').disabled = locked
     this.updateNextState()
   }
   private updateNextState() { el<HTMLButtonElement>('#nextButton').disabled = this.pulsing || !this.solved || this.stageNumber >= STAGES_PER_TRACK }
@@ -409,7 +409,7 @@ class NeyroScene extends Phaser.Scene {
     el<HTMLSelectElement>('#ageSelect').value = this.ageBand
     el<HTMLSelectElement>('#difficultySelect').value = this.difficulty
     boardSizeSelect.value = String(this.boardSizeOverride || this.stage?.track.boardSize || 4)
-    el<HTMLInputElement>('#stageInput').value = String(this.stageNumber)
+    el<HTMLSelectElement>('#stageSelect').value = String(this.stageNumber)
     el<HTMLSelectElement>('#chapterSelect').value = String(this.stage?.chapter ?? 1)
   }
 
