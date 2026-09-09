@@ -88,7 +88,7 @@ class NeyroScene extends Phaser.Scene {
 
     this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _objects: Phaser.GameObjects.GameObject[], _dx: number, dy: number) => {
       if ((this.stage?.track.boardSize ?? 0) < 12) return
-      camera.setZoom(Phaser.Math.Clamp(camera.zoom - dy * 0.0012, 0.55, 2.4))
+      camera.setZoom(Phaser.Math.Clamp(camera.zoom - dy * 0.0012, 0.35, 2.4))
     })
 
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
@@ -370,19 +370,21 @@ class NeyroScene extends Phaser.Scene {
     const minimumStep = n >= 30 ? 28 : n >= 20 ? 31 : n >= 12 ? 35 : 0
     const step = Math.max(viewportSize / n, minimumStep)
     const size = step * n
-    const left = size <= w ? (w - size) / 2 : 28
-    const top = size <= h ? (h - size) / 2 : 28
     const camera = this.cameras.main
+    const padding = 28
     const largeBoard = size > w || size > h
-    camera.setBounds(0, 0, Math.max(w, size + 56), Math.max(h, size + 56))
-    if (!largeBoard) {
-      camera.setZoom(1)
-      camera.centerOn(w / 2, h / 2)
-    } else {
-      const fitZoom = Phaser.Math.Clamp(Math.min(w / (size + 56), h / (size + 56)) * 1.18, .55, 1)
-      if (camera.zoom === 1) camera.setZoom(fitZoom)
-      camera.centerOn(left + size / 2, top + size / 2)
-    }
+    const fitZoom = largeBoard
+      ? Phaser.Math.Clamp(Math.min(w / (size + padding * 2), h / (size + padding * 2)), .35, 1)
+      : 1
+    const visibleWorldWidth = w / fitZoom
+    const visibleWorldHeight = h / fitZoom
+    const worldWidth = Math.max(size + padding * 2, visibleWorldWidth)
+    const worldHeight = Math.max(size + padding * 2, visibleWorldHeight)
+    const left = (worldWidth - size) / 2
+    const top = (worldHeight - size) / 2
+    camera.setBounds(0, 0, worldWidth, worldHeight)
+    camera.setZoom(fitZoom)
+    camera.centerOn(worldWidth / 2, worldHeight / 2)
     const panel = this.add.graphics(); panel.fillStyle(0x071422, 1); panel.lineStyle(2, 0x1f5a73, 1); panel.fillRoundedRect(left - 14, top - 14, size + 28, size + 28, 24); panel.strokeRoundedRect(left - 14, top - 14, size + 28, size + 28, 24); this.board.add(panel)
     const tutorial = !this.tutorialComplete && this.stageNumber <= 3
     const target = this.tutorialTarget(); const targetKey = target ? keyOf(target.row, target.col) : undefined
