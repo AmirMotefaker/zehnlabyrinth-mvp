@@ -220,3 +220,18 @@ body[data-age='18+'] .panel,body[data-age='18+'] .world-topbar { border-radius:1
 @media(max-width:1250px){
   .world-footer{width:100%;white-space:normal;padding:10px}
 }
+
+
+/* Issue #98 — final gameplay score polish */
+.world-brand{display:flex;align-items:center;justify-content:center;text-align:center}
+.world-brand .brand-block{display:flex;flex-direction:column;align-items:center;justify-content:center;width:max-content;margin-inline:auto}
+.world-brand .brand{line-height:.95;text-align:center}
+.world-brand .tagline{width:100%;text-align:center;margin-top:6px}
+.topbar-language{align-self:stretch;min-width:54px}
+.score-card{border:1px solid rgba(78,170,215,.35);border-radius:16px;padding:10px 12px;background:rgba(14,35,61,.72)}
+.score-card-title{font-weight:900;font-size:14px;margin-bottom:8px}
+.score-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.score-grid>div{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:58px;border:1px solid rgba(86,151,204,.28);border-radius:12px;background:rgba(8,28,49,.66)}
+.score-grid strong{font-size:18px;line-height:1.1}
+.score-grid span{font-size:11px;opacity:.78;margin-top:4px}
+#starScore{letter-spacing:2px;color:#ffd45c}
