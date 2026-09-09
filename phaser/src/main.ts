@@ -65,6 +65,10 @@ class NeyroScene extends Phaser.Scene {
   private moves = 0
   private hints = 0
   private pulseCount = 0
+  private masteryScore = 0
+  private stars = 0
+  private totalXp = Math.max(0, Number(localStorage.getItem('neyro.xp') || 0))
+  private stageStartedAt = performance.now()
   private reached = new Set<string>()
   private solved = false
   private pulsing = false
@@ -85,11 +89,6 @@ class NeyroScene extends Phaser.Scene {
     let dragging = false
     let lastX = 0
     let lastY = 0
-
-    this.input.on('wheel', (_pointer: Phaser.Input.Pointer, _objects: Phaser.GameObjects.GameObject[], _dx: number, dy: number) => {
-      if ((this.stage?.track.boardSize ?? 0) < 12) return
-      camera.setZoom(Phaser.Math.Clamp(camera.zoom - dy * 0.0012, 0.35, 2.4))
-    })
 
     this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
       if ((this.stage?.track.boardSize ?? 0) < 12) return
@@ -150,7 +149,7 @@ class NeyroScene extends Phaser.Scene {
     el<HTMLButtonElement>('#localeButton').onclick = () => {
       this.locale = this.locale === 'fa' ? 'en' : 'fa'
       localStorage.setItem('neyro.locale', this.locale)
-      this.applyLocale(); this.updateHud(); this.setStageInstruction(); this.drawBoard()
+      this.applyLocale(); this.updateHud(); this.updateScoreHud(); this.setStageInstruction(); this.drawBoard()
     }
   }
 
@@ -177,7 +176,7 @@ class NeyroScene extends Phaser.Scene {
     const allowed = this.tutorialComplete ? this.highestUnlocked() : Math.min(3, this.highestUnlocked())
     this.stageNumber = Math.min(number, allowed)
     this.stage = generateStage(this.currentTrack(), this.stageNumber, this.boardSizeOverride || undefined)
-    this.moves = 0; this.hints = 0; this.pulseCount = 0; this.solved = false; this.reached.clear(); this.undoStack = []
+    this.moves = 0; this.hints = 0; this.pulseCount = 0; this.masteryScore = 0; this.stars = 0; this.stageStartedAt = performance.now(); this.solved = false; this.reached.clear(); this.undoStack = []
     this.rotations = {}
     this.stage.grid.forEach((row, r) => row.forEach((tile, c) => {
       if (!this.isRotatable(tile)) return
@@ -247,6 +246,40 @@ class NeyroScene extends Phaser.Scene {
     }
   }
 
+  private calculateMasteryScore() {
+    if (!this.solved) return 0
+    const boardComplexity = Math.max(1, this.stage.track.boardSize * this.stage.track.boardSize)
+    const parMoves = Math.max(6, Math.round(Math.sqrt(boardComplexity) * 1.6))
+    const moveEfficiency = Phaser.Math.Clamp(1 - Math.max(0, this.moves - parMoves) / Math.max(parMoves, 1), 0, 1)
+    const elapsedSeconds = Math.max(1, (performance.now() - this.stageStartedAt) / 1000)
+    const parSeconds = Math.max(20, Math.sqrt(boardComplexity) * 3.5)
+    const timeEfficiency = Phaser.Math.Clamp(parSeconds / elapsedSeconds, 0, 1)
+    const cleanRun = Phaser.Math.Clamp(1 - this.hints * 0.35 - Math.max(0, this.pulseCount - this.stage.requiredPulses) * 0.15, 0, 1)
+    return Math.round(400 + 300 * moveEfficiency + 150 * timeEfficiency + 150 * cleanRun)
+  }
+
+  private awardCompletionScore() {
+    this.masteryScore = this.calculateMasteryScore()
+    this.stars = this.masteryScore >= 900 ? 3 : this.masteryScore >= 700 ? 2 : 1
+    const multiplier = this.difficulty === 'hard' ? 1.35 : this.difficulty === 'medium' ? 1.15 : 1
+    const boardBonus = 1 + Math.min(0.35, Math.max(0, this.stage.track.boardSize - 4) * 0.01)
+    const gainedXp = Math.max(25, Math.round(this.masteryScore * 0.12 * multiplier * boardBonus))
+    this.totalXp += gainedXp
+    localStorage.setItem('neyro.xp', String(this.totalXp))
+    const bestKey = 'neyro.best.' + this.stage.id
+    const previous = Number(localStorage.getItem(bestKey) || 0)
+    if (this.masteryScore > previous) localStorage.setItem(bestKey, String(this.masteryScore))
+  }
+
+  private updateScoreHud() {
+    const mastery = maybe('#masteryScore')
+    const stars = maybe('#starScore')
+    const xp = maybe('#xpScore')
+    if (mastery) mastery.textContent = digits(this.masteryScore, this.locale)
+    if (stars) stars.textContent = '★'.repeat(this.stars) + '☆'.repeat(3 - this.stars)
+    if (xp) xp.textContent = digits(this.totalXp, this.locale)
+  }
+
   private async sendPulse() {
     if (this.solved || this.pulsing) return
     this.setInteractionLocked(true); this.syncRuntimeRotations(); this.setStatus(copy[this.locale].sending)
@@ -257,11 +290,8 @@ class NeyroScene extends Phaser.Scene {
 
     if (result.complete) {
       this.solved = true
-      const bestKey = `neyro.best.${this.stage.id}`
-      const score = Math.max(0, 1000 - this.moves * 12 - this.hints * 25 - (this.pulseCount - this.stage.requiredPulses) * 20)
-      const previous = Number(localStorage.getItem(bestKey) || 0)
-      if (score > previous) localStorage.setItem(bestKey, String(score))
-      localStorage.setItem(`neyro.complete.${this.stage.id}`, '1')
+      this.awardCompletionScore()
+      localStorage.setItem('neyro.complete.' + this.stage.id, '1')
       this.unlockNext(); this.setStatus(copy[this.locale].solved)
     } else if (result.failure === 'phase-closed') this.setStatus(copy[this.locale].phaseClosed)
     else if (result.failure === 'relay-order') this.setStatus(copy[this.locale].relayOrder)
@@ -272,7 +302,7 @@ class NeyroScene extends Phaser.Scene {
       const detail = this.locale === 'fa' ? ` گره ${digits(nodeNumber, this.locale)} آخرین نقطه روشن بود.` : ` Node ${nodeNumber} was the last lit point.`
       this.setStatus(copy[this.locale].failed + detail)
     }
-    this.updateHud(); this.drawBoard(); this.setInteractionLocked(false); this.updateNextState()
+    this.updateHud(); this.updateScoreHud(); this.drawBoard(); this.setInteractionLocked(false); this.updateNextState()
   }
 
   private rotate(row: number, col: number, delta: -1 | 1) {
@@ -286,7 +316,7 @@ class NeyroScene extends Phaser.Scene {
     this.syncRuntimeRotations(); this.moves += 1; this.reached.clear()
     const ready = this.routeReady() && !this.tutorialComplete && this.stageNumber <= 3
     this.setStatus(ready ? copy[this.locale].tutorialPulse : delta === -1 ? copy[this.locale].rotatedLeft : copy[this.locale].rotatedRight)
-    this.updateHud(); this.drawBoard()
+    this.updateHud(); this.updateScoreHud(); this.drawBoard()
   }
 
   private hint() {
@@ -328,6 +358,7 @@ class NeyroScene extends Phaser.Scene {
       '#guideTitle': c.guideTitle, '#guideCopy': c.guideCopy, '#leftClickTitle': c.leftClickTitle, '#leftClickCopy': c.leftClickCopy,
       '#rightClickTitle': c.rightClickTitle, '#rightClickCopy': c.rightClickCopy, '#touchTitle': c.touchTitle, '#touchCopy': c.touchCopy,
       '#progressTitle': c.progressTitle, '#progressCopy': c.progressCopy, '#futureCopy': c.futureCopy,
+      '#scoreTitle': this.locale === 'fa' ? 'امتیاز' : 'Score', '#masteryLabel': this.locale === 'fa' ? 'مهارت' : 'Mastery', '#starsLabel': this.locale === 'fa' ? 'ستاره' : 'Stars', '#xpLabel': 'XP',
       '#legendStart': c.legendStart, '#legendGoal': c.legendGoal, '#legendStraight': c.legendStraight, '#legendElbow': c.legendElbow, '#legendBlocker': c.legendBlocker
     }
     for (const [selector, value] of Object.entries(values)) { const node = maybe(selector); if (node) node.textContent = value }
@@ -391,14 +422,15 @@ class NeyroScene extends Phaser.Scene {
 
     this.stage.grid.forEach((row, r) => row.forEach((tile, c) => {
       const x = left + step * (c + .5), y = top + step * (r + .5), cell = Math.max(28, step - 7), key = keyOf(r, c)
-      const reached = this.reached.has(key), onPath = this.stage.solutionPath.some(p => p.row === r && p.col === c)
+      const reached = this.reached.has(key)
+      const tutorialPath = tutorial && this.stage.solutionPath.some(p => p.row === r && p.col === c)
       const chargedRelay = tile.kind === 'relay' && this.runtime?.chargedRelays.includes(key)
       const chargedMirror = tile.mechanic === 'charged-mirror' && this.runtime?.chargedMirrors.includes(key)
-      const tutorialDim = tutorial && this.stageNumber <= 2 && !onPath
+      const tutorialDim = tutorial && this.stageNumber <= 2 && !tutorialPath
       const fill = tile.kind === 'blocker' ? 0x171e2d : tile.kind === 'empty' ? 0x071421 : reached ? 0x0b4a42 : chargedRelay || chargedMirror ? 0x243553 : 0x102943
       const g = this.add.graphics().setAlpha(tutorialDim ? .18 : 1); g.fillStyle(fill, 1)
       const isTarget = targetKey === key
-      g.lineStyle(isTarget ? 4 : reached ? 3 : chargedRelay || chargedMirror ? 3 : 1, isTarget ? 0xffd66b : reached ? 0x54f2cc : chargedRelay || chargedMirror ? 0xffd66b : onPath ? 0x2b607d : 0x1c3d56, 1)
+      g.lineStyle(isTarget ? 4 : reached ? 3 : chargedRelay || chargedMirror ? 3 : 1, isTarget ? 0xffd66b : reached ? 0x54f2cc : chargedRelay || chargedMirror ? 0xffd66b : 0x1c3d56, 1)
       g.fillRoundedRect(x - cell / 2, y - cell / 2, cell, cell, Math.min(12, cell * .16)); g.strokeRoundedRect(x - cell / 2, y - cell / 2, cell, cell, Math.min(12, cell * .16)); this.board!.add(g)
 
       if (tile.kind === 'start' || tile.kind === 'goal') {
