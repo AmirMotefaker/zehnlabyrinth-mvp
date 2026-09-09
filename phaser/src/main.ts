@@ -446,20 +446,14 @@ class NeyroScene extends Phaser.Scene {
     camera.setZoom(fitZoom)
     camera.centerOn(worldWidth / 2, worldHeight / 2)
     const panel = this.add.graphics(); panel.fillStyle(0x071422, 1); panel.lineStyle(2, 0x1f5a73, 1); panel.fillRoundedRect(left - 14, top - 14, size + 28, size + 28, 24); panel.strokeRoundedRect(left - 14, top - 14, size + 28, size + 28, 24); this.board.add(panel)
-    const tutorial = !this.tutorialComplete && this.stageNumber <= 3
-    const target = this.tutorialTarget(); const targetKey = target ? keyOf(target.row, target.col) : undefined
-
     this.stage.grid.forEach((row, r) => row.forEach((tile, c) => {
       const x = left + step * (c + .5), y = top + step * (r + .5), cell = Math.max(28, step - 7), key = keyOf(r, c)
       const reached = this.reached.has(key)
-      const tutorialPath = tutorial && this.stage.solutionPath.some(p => p.row === r && p.col === c)
       const chargedRelay = tile.kind === 'relay' && this.runtime?.chargedRelays.includes(key)
       const chargedMirror = tile.mechanic === 'charged-mirror' && this.runtime?.chargedMirrors.includes(key)
-      const tutorialDim = tutorial && this.stageNumber <= 2 && !tutorialPath
       const fill = tile.kind === 'blocker' ? 0x171e2d : tile.kind === 'empty' ? 0x071421 : reached ? 0x0b4a42 : chargedRelay || chargedMirror ? 0x243553 : 0x102943
-      const g = this.add.graphics().setAlpha(tutorialDim ? .18 : 1); g.fillStyle(fill, 1)
-      const isTarget = targetKey === key
-      g.lineStyle(isTarget ? 4 : reached ? 3 : chargedRelay || chargedMirror ? 3 : 1, isTarget ? 0xffd66b : reached ? 0x54f2cc : chargedRelay || chargedMirror ? 0xffd66b : 0x1c3d56, 1)
+      const g = this.add.graphics(); g.fillStyle(fill, 1)
+      g.lineStyle(reached ? 3 : chargedRelay || chargedMirror ? 3 : 1, reached ? 0x54f2cc : chargedRelay || chargedMirror ? 0xffd66b : 0x1c3d56, 1)
       g.fillRoundedRect(x - cell / 2, y - cell / 2, cell, cell, Math.min(12, cell * .16)); g.strokeRoundedRect(x - cell / 2, y - cell / 2, cell, cell, Math.min(12, cell * .16)); this.board!.add(g)
 
       if (tile.kind === 'start' || tile.kind === 'goal') {
@@ -470,11 +464,11 @@ class NeyroScene extends Phaser.Scene {
         return
       }
       if (tile.kind === 'blocker') {
-        const xg = this.add.graphics().setAlpha(tutorialDim ? .18 : 1); xg.lineStyle(5, 0x77849a, 1); xg.beginPath(); xg.moveTo(x-cell*.2,y-cell*.2); xg.lineTo(x+cell*.2,y+cell*.2); xg.moveTo(x+cell*.2,y-cell*.2); xg.lineTo(x-cell*.2,y+cell*.2); xg.strokePath(); this.board!.add(xg); return
+        const xg = this.add.graphics(); xg.lineStyle(5, 0x77849a, 1); xg.beginPath(); xg.moveTo(x-cell*.2,y-cell*.2); xg.lineTo(x+cell*.2,y+cell*.2); xg.moveTo(x+cell*.2,y-cell*.2); xg.lineTo(x-cell*.2,y+cell*.2); xg.strokePath(); this.board!.add(xg); return
       }
       if (tile.kind === 'empty') return
-      const rotation = this.rotationAt(r, c, tile), pipe = this.add.graphics().setAlpha(tutorialDim ? .18 : 1)
-      pipe.lineStyle(Math.max(5, cell * .1), reached ? 0xffd45c : tile.mechanic === 'decoy' ? 0x527d9a : 0x9bd5ff, 1)
+      const rotation = this.rotationAt(r, c, tile), pipe = this.add.graphics()
+      pipe.lineStyle(Math.max(5, cell * .1), reached ? 0xffd45c : 0x9bd5ff, 1)
       const len = cell * .38
       if (tile.kind === 'relay' || tile.kind === 'phase') {
         pipe.beginPath(); pipe.moveTo(x-len,y); pipe.lineTo(x+len,y); pipe.moveTo(x,y-len); pipe.lineTo(x,y+len); pipe.strokePath(); pipe.fillStyle(tile.kind === 'phase' ? 0x9278ff : chargedRelay ? 0xffd45c : 0x54f2cc,1); pipe.fillCircle(x,y,Math.max(5,cell*.09))
@@ -482,7 +476,7 @@ class NeyroScene extends Phaser.Scene {
         pipe.beginPath(); for (const direction of this.ports(tile, rotation)) { const d = DELTA[direction]; pipe.moveTo(x,y); pipe.lineTo(x+d.col*len,y+d.row*len) } pipe.strokePath()
       }
       this.board!.add(pipe)
-      if (this.isRotatable(tile) && !this.pulsing && !tutorialDim) {
+      if (this.isRotatable(tile) && !this.pulsing) {
         const hit = this.add.zone(x, y, cell, cell).setInteractive({ useHandCursor: true })
         hit.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
           const delta: -1 | 1 = pointer.pointerType === 'mouse' && pointer.button === 0 ? -1 : 1
