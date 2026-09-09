@@ -235,3 +235,26 @@ body[data-age='18+'] .panel,body[data-age='18+'] .world-topbar { border-radius:1
 .score-grid strong{font-size:18px;line-height:1.1}
 .score-grid span{font-size:11px;opacity:.78;margin-top:4px}
 #starScore{letter-spacing:2px;color:#ffd45c}
+
+
+/* Issue #100 — final controls QA */
+.control-card select,.stage-jump select{appearance:auto;color:var(--text);background:transparent;cursor:pointer}
+.control-card select option,.stage-jump select option{color:var(--text);background:var(--surface);font-weight:750}
+.topbar-language{display:flex;align-items:center;justify-content:center;min-width:58px;min-height:50px;font-weight:950;letter-spacing:.04em}
+.stage-jump select{font-variant-numeric:tabular-nums}
+
+body[data-theme='light']{
+  --bg:#edf3f8;--bg-deep:#dfe8f0;--surface:#ffffff;--surface-2:#f2f6fa;--surface-3:#dce7f0;--border:#9eb5c8;--text:#14263a;--muted:#536b80;--muted-2:#70869a;--game:#07101c;--shadow:rgba(36,55,74,.16);
+  background:radial-gradient(circle at 50% -10%,#ffffff 0,#edf3f8 42%,#dfe8f0 100%);
+}
+body[data-theme='light'] .world-topbar,body[data-theme='light'] .panel{background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(242,246,250,.96));border-color:#9eb5c8;box-shadow:0 16px 46px rgba(36,55,74,.13),inset 0 1px 0 #fff}
+body[data-theme='light'] .control-card,body[data-theme='light'] .mouse-row,body[data-theme='light'] .touch-help,body[data-theme='light'] .progress-card,body[data-theme='light'] .track-card,body[data-theme='light'] .score-card{background:#f6f9fc;border-color:#abc0d1}
+body[data-theme='light'] .control-card:focus-within{background:#fff;border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+body[data-theme='light'] .control-card select option,body[data-theme='light'] .stage-jump select option{background:#fff;color:#14263a}
+body[data-theme='light'] .game-card{background:#07101c;border-color:color-mix(in srgb,var(--accent) 45%,#52718c);box-shadow:0 18px 52px rgba(20,38,58,.22)}
+body[data-theme='light'] #game canvas{filter:none}
+body[data-theme='light'] .world-footer{color:#24384d}
+body[data-theme='light'] .world-footer a{color:#dc2626}
+
+@media (min-width:1251px){.world-topbar{grid-template-columns:repeat(5,minmax(105px,1fr)) auto minmax(120px,.8fr) auto}}
+@media (max-width:820px){.topbar-language{display:flex}.world-topbar{grid-template-columns:repeat(2,1fr) auto}.world-topbar .stage-jump{display:flex}}

@@ -111,17 +111,19 @@ class NeyroScene extends Phaser.Scene {
     for (let chapter = 1; chapter <= CHAPTERS_PER_TRACK; chapter += 1) {
       const option = document.createElement('option')
       option.value = String(chapter)
+      option.textContent = `${copy[this.locale].chapter} ${digits(chapter, this.locale)}`
       chapterSelect.append(option)
     }
-    const stageInput = el<HTMLInputElement>('#stageInput')
+    const stageSelect = el<HTMLSelectElement>('#stageSelect')
     const boardSizeSelect = el<HTMLSelectElement>('#boardSizeSelect')
     boardSizeSelect.replaceChildren()
     for (let size = 3; size <= 50; size += 1) {
       const option = document.createElement('option')
       option.value = String(size)
+      option.textContent = `${digits(size, this.locale)}×${digits(size, this.locale)}`
       boardSizeSelect.append(option)
     }
-    stageInput.max = String(STAGES_PER_TRACK)
+    this.refreshStageSelect()
 
     el<HTMLButtonElement>('#pulseButton').onclick = () => void this.sendPulse()
     el<HTMLButtonElement>('#hintButton').onclick = () => this.hint()
@@ -137,20 +139,46 @@ class NeyroScene extends Phaser.Scene {
       this.difficulty = el<HTMLSelectElement>('#difficultySelect').value as Difficulty
       this.boardSizeOverride = Number(boardSizeSelect.value)
       localStorage.setItem('neyro.boardSize', String(this.boardSizeOverride))
-      const requested = Math.min(STAGES_PER_TRACK, Math.max(1, Number(stageInput.value) || 1))
+      const requested = Math.min(STAGES_PER_TRACK, Math.max(1, Number(stageSelect.value) || 1))
       this.loadStage(Math.min(requested, this.highestUnlocked()))
     }
     chapterSelect.onchange = event => {
       if (this.pulsing) return
       const chapter = Number((event.target as HTMLSelectElement).value)
       const firstStage = (chapter - 1) * STAGES_PER_CHAPTER + 1
+      this.refreshStageSelect(chapter)
       this.loadStage(Math.min(firstStage, this.highestUnlocked()))
     }
     el<HTMLButtonElement>('#localeButton').onclick = () => {
       this.locale = this.locale === 'fa' ? 'en' : 'fa'
       localStorage.setItem('neyro.locale', this.locale)
-      this.applyLocale(); this.updateHud(); this.updateScoreHud(); this.setStageInstruction(); this.drawBoard()
+      this.applyLocale(); this.refreshStageSelect(); this.updateHud(); this.updateScoreHud(); this.setStageInstruction(); this.drawBoard()
     }
+  }
+
+  private refreshStageSelect(chapterOverride?: number) {
+    const chapterSelect = el<HTMLSelectElement>('#chapterSelect')
+    const stageSelect = el<HTMLSelectElement>('#stageSelect')
+    const chapter = chapterOverride ?? Number(chapterSelect.value || 1)
+    const first = (chapter - 1) * STAGES_PER_CHAPTER + 1
+    const last = Math.min(first + STAGES_PER_CHAPTER - 1, this.highestUnlocked())
+    const current = this.stageNumber
+    stageSelect.replaceChildren()
+    for (let globalStage = first; globalStage <= last; globalStage += 1) {
+      const option = document.createElement('option')
+      option.value = String(globalStage)
+      const localStage = globalStage - first + 1
+      option.textContent = digits(localStage, this.locale)
+      stageSelect.append(option)
+    }
+    if (!stageSelect.options.length) {
+      const option = document.createElement('option')
+      option.value = String(Math.min(first, this.highestUnlocked()))
+      option.textContent = digits(1, this.locale)
+      stageSelect.append(option)
+    }
+    const desired = Array.from(stageSelect.options).some(option => Number(option.value) === current) ? current : Number(stageSelect.options[0].value)
+    stageSelect.value = String(desired)
   }
 
   private currentTrack() { return getTracks().find(track => track.ageBand === this.ageBand && track.difficulty === this.difficulty) ?? getTracks()[0] }
@@ -190,6 +218,7 @@ class NeyroScene extends Phaser.Scene {
     localStorage.setItem('neyro.age', this.ageBand)
     localStorage.setItem('neyro.difficulty', this.difficulty)
     localStorage.setItem('neyro.stage', String(this.stageNumber))
+    this.refreshStageSelect(Math.floor((this.stageNumber - 1) / STAGES_PER_CHAPTER) + 1)
     this.applyLocale(); this.setStageInstruction(); this.updateHud(); this.drawBoard(); this.updateNextState()
   }
 
