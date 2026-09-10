@@ -223,6 +223,7 @@ class NeyroScene extends Phaser.Scene {
     localStorage.setItem('neyro.stage', String(this.stageNumber))
     this.refreshStageSelect(Math.floor((this.stageNumber - 1) / STAGES_PER_CHAPTER) + 1)
     this.applyLocale(); this.setStageInstruction(); this.updateHud(); this.drawBoard(); this.updateNextState()
+    window.dispatchEvent(new CustomEvent('neyro:stage-loaded', { detail: { stageNumber: this.stageNumber, chapter: this.stage.chapter, highestUnlocked: this.highestUnlocked() } }))
   }
 
   private setStageInstruction() {
@@ -322,7 +323,13 @@ class NeyroScene extends Phaser.Scene {
 
     if (result.complete) {
       this.solved = true
+      const xpBefore = this.totalXp
       this.awardCompletionScore()
+      const elapsedSeconds = Math.max(1, Math.round((performance.now() - this.stageStartedAt) / 1000))
+      window.dispatchEvent(new CustomEvent('neyro:stage-complete', { detail: {
+        stageNumber: this.stageNumber, chapter: this.stage.chapter, mastery: this.masteryScore, stars: this.stars,
+        moves: this.moves, hints: this.hints, elapsedSeconds, xpGain: this.totalXp - xpBefore, totalXp: this.totalXp
+      } }))
       localStorage.setItem('neyro.complete.' + this.stage.id, '1')
       this.unlockNext(); this.setStatus(copy[this.locale].solved)
     } else if (result.failure === 'phase-closed') this.setStatus(copy[this.locale].phaseClosed)

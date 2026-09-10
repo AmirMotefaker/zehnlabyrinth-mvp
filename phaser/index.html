@@ -37,6 +37,30 @@
 </div>
 
 <main class="world-shell">
+      <section id="worldMapOverlay" class="journey-overlay" hidden aria-label="World map">
+        <div class="journey-panel world-map-panel">
+          <div class="journey-panel-head"><div><small>NEYRO JOURNEY</small><h2 id="worldMapTitle">نقشه جهان‌ها</h2></div><button id="worldMapClose" type="button">×</button></div>
+          <p id="worldMapCopy">فصل بعدی را انتخاب کن. فصل‌های آینده با پیشرفت تو باز می‌شوند.</p>
+          <div id="worldMapGrid" class="world-map-grid"></div>
+        </div>
+      </section>
+
+      <section id="resultOverlay" class="journey-overlay" hidden aria-label="Stage result">
+        <div class="journey-panel result-panel">
+          <div class="result-kicker" id="resultKicker">مرحله کامل شد</div>
+          <div id="resultStars" class="result-stars">★★★</div>
+          <h2 id="resultTitle">شبکه روشن شد</h2>
+          <div class="result-score"><span id="resultMastery">۰</span><small>Mastery</small></div>
+          <div class="result-grid">
+            <span><strong id="resultMoves">۰</strong><small id="resultMovesLabel">حرکت</small></span>
+            <span><strong id="resultTime">۰s</strong><small id="resultTimeLabel">زمان</small></span>
+            <span><strong id="resultHints">۰</strong><small id="resultHintsLabel">راهنما</small></span>
+            <span><strong id="resultXp">+۰ XP</strong><small>XP</small></span>
+          </div>
+          <div class="result-actions"><button id="resultWorlds" type="button">نقشه جهان‌ها</button><button id="resultNext" class="journey-primary" type="button">مرحله بعد</button></div>
+        </div>
+      </section>
+
       <header class="world-brand" aria-label="NEYRO">
         <div class="brand-block"><div class="brand">NEYRO</div><div class="tagline" id="tagline">هزارتوی ذهن</div></div>
       </header>
@@ -50,6 +74,7 @@
         <button id="loadButton" class="compact load-stage" type="button">اعمال</button>
         <label class="control-card theme-control"><span id="themeText">حالت نمایش</span><select id="themeSelect" aria-label="حالت نمایش"><option value="dark">تیره</option><option value="light">روشن</option><option value="system">سیستم</option></select></label>
         <button id="localeButton" class="compact language-switch topbar-language" type="button" aria-label="تغییر زبان">EN</button>
+        <button id="worldMapButton" class="compact" type="button" aria-label="نقشه جهان‌ها">◈</button>
       </section>
 
       <aside class="world-guide panel" aria-label="راهنمای بازی">
