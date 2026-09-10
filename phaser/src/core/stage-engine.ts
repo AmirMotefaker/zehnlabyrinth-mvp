@@ -249,6 +249,43 @@ function progressivePath(track: TrackDefinition, chapter: number, random: () => 
   return path
 }
 
+function applyDiversitySignature(
+  grid: StageTile[][],
+  pathKeys: Set<string>,
+  track: TrackDefinition,
+  chapter: number,
+  stageNumber: number
+) {
+  if (stageNumber <= 3) return
+
+  const size = track.boardSize
+  const diff = DIFFICULTIES.indexOf(track.difficulty)
+  const age = AGE_BANDS.indexOf(track.ageBand)
+  const signatureRandom = mulberry32(hashString(`neyro-v4-signature|${track.id}|${chapter}|${stageNumber}|${size}`))
+  const candidates: Point[] = []
+
+  for (let row = 0; row < size; row += 1) {
+    for (let col = 0; col < size; col += 1) {
+      if (!pathKeys.has(`${row}:${col}`)) candidates.push({ row, col })
+    }
+  }
+
+  for (let i = candidates.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(signatureRandom() * (i + 1))
+    ;[candidates[i], candidates[j]] = [candidates[j], candidates[i]]
+  }
+
+  const sizeBoost = Math.floor(Math.max(0, size - 4) / 10)
+  const signatureCells = Math.min(candidates.length, Math.max(3, Math.min(9, 3 + diff + Math.floor(age / 2) + sizeBoost)))
+
+  for (let i = 0; i < signatureCells; i += 1) {
+    const point = candidates[i]
+    const kind = signatureRandom() < 0.46 ? 'straight' : 'elbow'
+    const targetRotation = Math.floor(signatureRandom() * 4) as 0 | 1 | 2 | 3
+    grid[point.row][point.col] = { kind, targetRotation, mechanic: 'decoy' }
+  }
+}
+
 function encodePoint(point: Point, size: number, symmetry: number): string {
   const r = point.row
   const c = point.col
@@ -326,6 +363,8 @@ export function generateStage(track: TrackDefinition, stageNumber: number, reque
       }
     }
   }
+
+  applyDiversitySignature(grid, pathKeys, stageTrack, chapter, stageNumber)
 
   const mechanics = stageNumber <= 3 ? ['rail', 'elbow'] : mechanicsFor(track, chapter)
   const requiredPulses = stageNumber <= 3 ? 1 : requiredPulsesFor(track, chapter)
