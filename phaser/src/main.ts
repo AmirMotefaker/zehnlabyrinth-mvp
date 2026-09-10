@@ -161,24 +161,26 @@ class NeyroScene extends Phaser.Scene {
     const stageSelect = el<HTMLSelectElement>('#stageSelect')
     const chapter = chapterOverride ?? Number(chapterSelect.value || 1)
     const first = (chapter - 1) * STAGES_PER_CHAPTER + 1
-    const last = Math.min(first + STAGES_PER_CHAPTER - 1, this.highestUnlocked())
+    const last = Math.min(STAGES_PER_TRACK, first + STAGES_PER_CHAPTER - 1)
+    const highestUnlocked = this.highestUnlocked()
     const current = this.stageNumber
     stageSelect.replaceChildren()
+
     for (let globalStage = first; globalStage <= last; globalStage += 1) {
       const option = document.createElement('option')
       option.value = String(globalStage)
       const localStage = globalStage - first + 1
-      option.textContent = digits(localStage, this.locale)
+      const locked = globalStage > highestUnlocked
+      option.disabled = locked
+      option.textContent = locked
+        ? `${digits(localStage, this.locale)}  🔒`
+        : digits(localStage, this.locale)
       stageSelect.append(option)
     }
-    if (!stageSelect.options.length) {
-      const option = document.createElement('option')
-      option.value = String(Math.min(first, this.highestUnlocked()))
-      option.textContent = digits(1, this.locale)
-      stageSelect.append(option)
-    }
-    const desired = Array.from(stageSelect.options).some(option => Number(option.value) === current) ? current : Number(stageSelect.options[0].value)
-    stageSelect.value = String(desired)
+
+    const currentInChapter = current >= first && current <= last
+    const fallback = Math.min(Math.max(first, Math.min(highestUnlocked, last)), last)
+    stageSelect.value = String(currentInChapter ? current : fallback)
   }
 
   private currentTrack() { return getTracks().find(track => track.ageBand === this.ageBand && track.difficulty === this.difficulty) ?? getTracks()[0] }
@@ -195,6 +197,7 @@ class NeyroScene extends Phaser.Scene {
       localStorage.setItem('neyro.tutorialComplete', '1')
       if (Number(localStorage.getItem(this.unlockKey()) || 1) < 4) localStorage.setItem(this.unlockKey(), '4')
     }
+    this.refreshStageSelect()
   }
 
   private syncRuntimeRotations() { this.runtime = { ...this.runtime, rotations: { ...this.rotations }, reached: [], complete: false } }

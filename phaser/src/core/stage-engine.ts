@@ -112,13 +112,14 @@ export function boardSizeFor(track: TrackDefinition, chapter: number): number {
   return 8
 }
 
-function clutterFor(track: TrackDefinition, chapter: number, stageNumber: number) {
+function clutterFor(track: TrackDefinition, chapter: number, stageNumber: number, boardSize: number) {
   if (stageNumber <= 3) return { blockerCutoff: 0.04, decoyCutoff: 0.22 }
   const age = AGE_BANDS.indexOf(track.ageBand)
   const diff = DIFFICULTIES.indexOf(track.difficulty)
   const chapterProgress = (chapter - 1) / Math.max(1, CHAPTERS_PER_TRACK - 1)
-  const blockerCutoff = Math.min(0.34, 0.07 + age * 0.03 + diff * 0.04 + chapterProgress * 0.12)
-  const decoyCutoff = Math.min(0.8, blockerCutoff + 0.22 + age * 0.03 + diff * 0.04 + chapterProgress * 0.12)
+  const sizeProgress = Math.min(1, Math.max(0, (boardSize - 4) / 46))
+  const blockerCutoff = Math.min(0.38, 0.07 + age * 0.025 + diff * 0.04 + chapterProgress * 0.1 + sizeProgress * (0.035 + diff * 0.012))
+  const decoyCutoff = Math.min(0.84, blockerCutoff + 0.2 + age * 0.025 + diff * 0.035 + chapterProgress * 0.1 + sizeProgress * (0.08 + diff * 0.015))
   return { blockerCutoff, decoyCutoff }
 }
 
@@ -189,6 +190,65 @@ function monotonicPath(size: number, random: () => number): Point[] {
   return path
 }
 
+function progressivePath(track: TrackDefinition, chapter: number, random: () => number): Point[] {
+  const size = track.boardSize
+  if (size <= 3) return monotonicPath(size, random)
+
+  const age = AGE_BANDS.indexOf(track.ageBand)
+  const diff = DIFFICULTIES.indexOf(track.difficulty)
+  const sizeBoost = Math.max(0, Math.floor((size - 6) / 8))
+  const chapterBoost = Math.floor((chapter - 1) / 12)
+  const capByDifficulty = [5, 7, 9][diff]
+  const intermediateCount = Math.max(1, Math.min(size - 2, capByDifficulty, 1 + age + diff * 2 + sizeBoost + chapterBoost))
+  const rows: number[] = []
+  let previousRow = 0
+
+  for (let i = 1; i <= intermediateCount; i += 1) {
+    const remaining = intermediateCount - i
+    const ideal = Math.round((i * (size - 1)) / (intermediateCount + 1))
+    const spacing = Math.max(1, Math.floor((size - 1) / (intermediateCount + 1)))
+    const jitter = Math.floor((random() - 0.5) * Math.max(1, spacing))
+    const minRow = previousRow + 1
+    const maxRow = (size - 2) - remaining
+    const row = Math.min(maxRow, Math.max(minRow, ideal + jitter))
+    rows.push(row)
+    previousRow = row
+  }
+
+  const path: Point[] = [{ row: 0, col: 0 }]
+  let row = 0
+  let col = 0
+  const appendHorizontal = (targetCol: number) => {
+    while (col !== targetCol) {
+      col += targetCol > col ? 1 : -1
+      path.push({ row, col })
+    }
+  }
+  const appendVertical = (targetRow: number) => {
+    while (row !== targetRow) {
+      row += targetRow > row ? 1 : -1
+      path.push({ row, col })
+    }
+  }
+
+  rows.forEach((targetRow, index) => {
+    const highSide = index % 2 === 0
+    const lowMax = Math.max(0, Math.floor((size - 1) * 0.34))
+    const highMin = Math.min(size - 1, Math.ceil((size - 1) * 0.66))
+    const minCol = highSide ? highMin : 0
+    const maxCol = highSide ? size - 1 : lowMax
+    const targetCol = minCol + Math.floor(random() * (maxCol - minCol + 1))
+    appendHorizontal(targetCol)
+    appendVertical(targetRow)
+  })
+
+  appendVertical(size - 1)
+  appendHorizontal(size - 1)
+
+  if (random() < 0.5) return path.map(point => ({ row: point.col, col: point.row }))
+  return path
+}
+
 function encodePoint(point: Point, size: number, symmetry: number): string {
   const r = point.row
   const c = point.col
@@ -228,7 +288,7 @@ export function generateStage(track: TrackDefinition, stageNumber: number, reque
   const stageTrack: TrackDefinition = { ...track, boardSize: selectedBoardSize }
   const seed = hashString(`neyro-v3|${track.id}|${stageNumber}|${stageTrack.boardSize}`)
   const random = mulberry32(seed)
-  const path = monotonicPath(stageTrack.boardSize, random)
+  const path = stageNumber <= 3 ? monotonicPath(stageTrack.boardSize, random) : progressivePath(stageTrack, chapter, random)
   const pathKeys = new Set(path.map(p => `${p.row}:${p.col}`))
   const grid: StageTile[][] = Array.from({ length: stageTrack.boardSize }, () => Array.from({ length: stageTrack.boardSize }, () => ({ kind: 'empty' as const, targetRotation: 0 as const })))
 
@@ -251,7 +311,7 @@ export function generateStage(track: TrackDefinition, stageNumber: number, reque
     }
   }
 
-  const clutter = clutterFor(track, chapter, stageNumber)
+  const clutter = clutterFor(track, chapter, stageNumber, stageTrack.boardSize)
   for (let r = 0; r < stageTrack.boardSize; r += 1) {
     for (let c = 0; c < stageTrack.boardSize; c += 1) {
       if (pathKeys.has(`${r}:${c}`)) continue
