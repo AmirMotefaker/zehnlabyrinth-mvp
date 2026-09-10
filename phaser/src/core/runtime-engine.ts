@@ -33,6 +33,34 @@ function pathIndex(stage: StageDefinition, key: string) {
   return stage.solutionPath.findIndex(p => runtimeKey(p.row, p.col) === key)
 }
 
+function directionBetweenRuntime(from: Point, to: Point): Direction | undefined {
+  const rowDelta = to.row - from.row
+  const colDelta = to.col - from.col
+  if (rowDelta === -1 && colDelta === 0) return 'N'
+  if (rowDelta === 1 && colDelta === 0) return 'S'
+  if (rowDelta === 0 && colDelta === 1) return 'E'
+  if (rowDelta === 0 && colDelta === -1) return 'W'
+  return undefined
+}
+
+function canonicalPathPorts(stage: StageDefinition, row: number, col: number): Direction[] {
+  const index = pathIndex(stage, runtimeKey(row, col))
+  if (index < 0) return []
+  const current = stage.solutionPath[index]
+  const directions: Direction[] = []
+  const previous = stage.solutionPath[index - 1]
+  const next = stage.solutionPath[index + 1]
+  if (previous) {
+    const direction = directionBetweenRuntime(current, previous)
+    if (direction) directions.push(direction)
+  }
+  if (next) {
+    const direction = directionBetweenRuntime(current, next)
+    if (direction) directions.push(direction)
+  }
+  return directions
+}
+
 function orderedRelayKeys(stage: StageDefinition) {
   if (!stage.mechanics.includes('ordered-relay')) return []
   return stage.solutionPath
@@ -71,9 +99,9 @@ function ports(stage: StageDefinition, state: RuntimeState, row: number, col: nu
   if (tile.kind === 'goal') return [stage.goalDirection]
   if (tile.kind === 'phase') {
     const opensOn = stage.requiredPulses
-    return state.pulseIndex + 1 >= opensOn ? ['N', 'E', 'S', 'W'] : []
+    return state.pulseIndex + 1 >= opensOn ? canonicalPathPorts(stage, row, col) : []
   }
-  if (tile.kind === 'relay') return ['N', 'E', 'S', 'W']
+  if (tile.kind === 'relay') return canonicalPathPorts(stage, row, col)
   const rotation = rotationAt(state, row, col, tile)
   if (tile.kind === 'straight') return rotation % 2 === 0 ? ['E', 'W'] : ['N', 'S']
   if (tile.kind === 'elbow') return ([['N', 'E'], ['E', 'S'], ['S', 'W'], ['W', 'N']][rotation] ?? []) as Direction[]
