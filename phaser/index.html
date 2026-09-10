@@ -12,7 +12,31 @@
     <title>NEYRO | هزارتوی ذهن</title>
   </head>
   <body data-age="5-8" data-difficulty="easy" data-theme="dark">
-    <main class="world-shell">
+    <section id="journeyHome" class="journey-home" aria-label="NEYRO journey">
+  <div class="journey-orbit" aria-hidden="true"></div>
+  <div class="journey-hero">
+    <div class="journey-logo">NEYRO</div>
+    <div class="journey-tagline">هزارتوی ذهن · Mind Labyrinth</div>
+    <h1>شبکه را بیدار کن.</h1>
+    <p>کاشی‌ها را بچرخان، پالس را هدایت کن و جهان‌های NEYRO را یکی‌یکی روشن کن.</p>
+    <div class="journey-actions">
+      <button id="journeyContinue" class="journey-primary" type="button">ادامه مسیر</button>
+      <button id="journeyNew" type="button">شروع سفر جدید</button>
+    </div>
+    <div class="journey-meta"><span>۲۲۵٬۰۰۰ مرحله</span><span>۵۰ فصل</span><span>فارسی · English</span></div>
+  </div>
+</section>
+
+<div id="journeyTutorial" class="journey-tutorial" hidden>
+  <div class="journey-tutorial-card">
+    <span class="journey-step">01 / 03</span>
+    <strong>مسیر نور را بساز</strong>
+    <p>از ◆ آغاز کن. هر کاشی را بچرخان تا اتصال نور به ★ برسد.</p>
+    <button id="journeyTutorialNext" class="journey-primary" type="button">فهمیدم، شروع کنیم</button>
+  </div>
+</div>
+
+<main class="world-shell">
       <header class="world-brand" aria-label="NEYRO">
         <div class="brand-block"><div class="brand">NEYRO</div><div class="tagline" id="tagline">هزارتوی ذهن</div></div>
       </header>
@@ -78,6 +102,7 @@
 
       <footer class="world-footer">ساخته شده با ❤️ برای گیمرهای حرفه ای توسط <a href="https://amirmotefaker.ir/" target="_blank" rel="noopener noreferrer">امیر متفکر</a></footer>
     </main>
+    <script type="module" src="/src/journey-ui.ts"></script>
     <script type="module" src="/src/ui-preferences.ts"></script>
     <script type="module" src="/src/premium-ui.ts"></script>
     <script type="module" src="/src/locale-numbers.ts"></script>
