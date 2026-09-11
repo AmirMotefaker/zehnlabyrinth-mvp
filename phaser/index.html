@@ -45,6 +45,19 @@
         </div>
       </section>
 
+      <section id="gameFeelOverlay" class="journey-overlay" hidden aria-label="Game feel settings">
+        <div class="journey-panel feel-panel">
+          <div class="journey-panel-head"><div><small>NEYRO ACCESS</small><h2 id="gameFeelTitle">بازخورد و دسترسی</h2></div><button id="gameFeelClose" type="button" aria-label="بستن">×</button></div>
+          <p id="gameFeelCopy">صدا، لرزش و حرکت را مطابق ترجیح خودت تنظیم کن.</p>
+          <div class="feel-settings">
+            <label><span id="soundSettingLabel">صدا</span><input id="soundToggle" type="checkbox" checked></label>
+            <label><span id="hapticSettingLabel">لرزش</span><input id="hapticToggle" type="checkbox" checked></label>
+            <label><span id="motionSettingLabel">کاهش حرکت</span><input id="reducedMotionToggle" type="checkbox"></label>
+            <label><span id="contrastSettingLabel">کنتراست بالا</span><input id="highContrastToggle" type="checkbox"></label>
+          </div>
+        </div>
+      </section>
+
       <section id="profileOverlay" class="journey-overlay" hidden aria-label="Player profile">
         <div class="journey-panel profile-panel">
           <div class="journey-panel-head"><div><small>NEYRO ID</small><h2 id="profileTitle">پروفایل بازیکن</h2></div><button id="profileClose" type="button" aria-label="بستن">×</button></div>
@@ -94,6 +107,7 @@
         <button id="localeButton" class="compact language-switch topbar-language" type="button" aria-label="تغییر زبان">EN</button>
         <button id="worldMapButton" class="compact" type="button" aria-label="نقشه جهان‌ها">◈</button>
         <button id="profileButton" class="compact profile-open" type="button" aria-label="پروفایل بازیکن">◎</button>
+        <button id="gameFeelButton" class="compact" type="button" aria-label="تنظیمات دسترسی و بازخورد">⚙</button>
       </section>
 
       <aside class="world-guide panel" aria-label="راهنمای بازی">
@@ -148,6 +162,7 @@
     </main>
     <script type="module" src="/src/journey-ui.ts"></script>
     <script type="module" src="/src/profile-ui.ts"></script>
+    <script type="module" src="/src/game-feel.ts"></script>
     <script type="module" src="/src/ui-preferences.ts"></script>
     <script type="module" src="/src/premium-ui.ts"></script>
     <script type="module" src="/src/locale-numbers.ts"></script>
