@@ -1,3 +1,5 @@
+export {}
+
 type Locale = 'fa' | 'en'
 
 type StageCompleteDetail = {
