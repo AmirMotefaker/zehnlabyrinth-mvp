@@ -316,6 +316,7 @@ class NeyroScene extends Phaser.Scene {
   private async sendPulse() {
     if (this.solved || this.pulsing) return
     this.setInteractionLocked(true); this.syncRuntimeRotations(); this.setStatus(copy[this.locale].sending)
+    window.dispatchEvent(new CustomEvent('neyro:pulse-start'))
     const result = applyPulse(this.stage, this.runtime)
     this.runtime = result.state; this.pulseCount = this.runtime.pulseIndex; this.updateHud()
     const order = result.reached.map(key => { const [row, col] = key.split(':').map(Number); return { row, col } })
@@ -341,6 +342,7 @@ class NeyroScene extends Phaser.Scene {
       const detail = this.locale === 'fa' ? ` گره ${digits(nodeNumber, this.locale)} آخرین نقطه روشن بود.` : ` Node ${nodeNumber} was the last lit point.`
       this.setStatus(copy[this.locale].failed + detail)
     }
+    window.dispatchEvent(new CustomEvent('neyro:pulse-result', { detail: { complete: result.complete, failure: result.failure, goalReached: result.goalReached } }))
     this.updateHud(); this.updateScoreHud(); this.drawBoard(); this.setInteractionLocked(false); this.updateNextState()
   }
 
@@ -356,6 +358,7 @@ class NeyroScene extends Phaser.Scene {
     const ready = this.routeReady() && !this.tutorialComplete && this.stageNumber <= 3
     this.setStatus(ready ? copy[this.locale].tutorialPulse : delta === -1 ? copy[this.locale].rotatedLeft : copy[this.locale].rotatedRight)
     this.updateHud(); this.updateScoreHud(); this.drawBoard()
+    window.dispatchEvent(new CustomEvent('neyro:tile-rotate', { detail: { delta, row, col } }))
   }
 
   private hint() {
