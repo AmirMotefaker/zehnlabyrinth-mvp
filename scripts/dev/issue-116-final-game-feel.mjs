@@ -11,8 +11,10 @@ let main = fs.readFileSync(mainPath, 'utf8')
 let css = fs.readFileSync(cssPath, 'utf8')
 
 if (!html.includes('id="gameFeelButton"')) {
-  const anchor = '<button id="profileButton" class="compact" type="button" aria-label="پروفایل بازیکن">پروفایل</button>'
-  if (!html.includes(anchor)) throw new Error('profile button anchor not found')
+  const profileButtonPattern = /<button id="profileButton"[^>]*>[^<]*<\/button>/
+  const match = html.match(profileButtonPattern)
+  if (!match) throw new Error('profile button anchor not found')
+  const anchor = match[0]
   html = html.replace(anchor, anchor + '\n        <button id="gameFeelButton" class="compact" type="button" aria-label="تنظیمات دسترسی و بازخورد">⚙</button>')
 
   const overlayAnchor = '<section id="profileOverlay"'
