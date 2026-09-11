@@ -327,7 +327,7 @@ class NeyroScene extends Phaser.Scene {
       this.awardCompletionScore()
       const elapsedSeconds = Math.max(1, Math.round((performance.now() - this.stageStartedAt) / 1000))
       window.dispatchEvent(new CustomEvent('neyro:stage-complete', { detail: {
-        stageNumber: this.stageNumber, chapter: this.stage.chapter, mastery: this.masteryScore, stars: this.stars,
+        stageId: this.stage.id, stageNumber: this.stageNumber, chapter: this.stage.chapter, mastery: this.masteryScore, stars: this.stars,
         moves: this.moves, hints: this.hints, elapsedSeconds, xpGain: this.totalXp - xpBefore, totalXp: this.totalXp
       } }))
       localStorage.setItem('neyro.complete.' + this.stage.id, '1')
