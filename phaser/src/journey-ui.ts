@@ -18,6 +18,51 @@ const localizedNumber = (value: number) => currentLocale() === 'fa'
   ? String(value).replace(/\d/g, d => faDigits[Number(d)])
   : String(value)
 
+const tutorialSteps = {
+  fa: [
+    {
+      step: '۰۱ / ۰۳',
+      title: 'مسیر نور را بساز',
+      copy: 'از ◆ آغاز کن. هر کاشی را بچرخان تا اتصال نور به ★ برسد.',
+      next: 'بعدی'
+    },
+    {
+      step: '۰۲ / ۰۳',
+      title: 'کاشی‌ها را بچرخان',
+      copy: 'در دسکتاپ کلیک چپ و راست جهت چرخش را عوض می‌کند. در موبایل با لمس کاشی آن را بچرخان.',
+      next: 'بعدی'
+    },
+    {
+      step: '۰۳ / ۰۳',
+      title: 'پالس را بفرست',
+      copy: 'وقتی مسیر آماده شد «ارسال پالس» را بزن. اگر گیر کردی، راهنما یک حرکت درست را با هزینه امتیاز نشان می‌دهد.',
+      next: 'بریم به نقشه جهان‌ها'
+    }
+  ],
+  en: [
+    {
+      step: '01 / 03',
+      title: 'Build the light path',
+      copy: 'Start at ◆. Rotate the tiles until the light connection reaches ★.',
+      next: 'Next'
+    },
+    {
+      step: '02 / 03',
+      title: 'Rotate the tiles',
+      copy: 'On desktop, left and right click rotate in opposite directions. On mobile, tap a tile to rotate it.',
+      next: 'Next'
+    },
+    {
+      step: '03 / 03',
+      title: 'Send the pulse',
+      copy: 'When the route is ready, press Send pulse. If you get stuck, Hint reveals one correct move with a score cost.',
+      next: 'Open world map'
+    }
+  ]
+} as const
+
+let tutorialIndex = 0
+
 const journeyCopy = {
   fa: {
     continueJourney: 'ادامه مسیر', startGame: 'شروع بازی', newJourney: 'شروع سفر جدید',
@@ -62,10 +107,11 @@ function applyJourneyLocale() {
   const tutorialStep = tutorial?.querySelector<HTMLElement>('.journey-step')
   const tutorialTitle = tutorial?.querySelector<HTMLElement>('strong')
   const tutorialCopy = tutorial?.querySelector<HTMLElement>('p')
-  if (tutorialStep) tutorialStep.textContent = c.tutorialStep
-  if (tutorialTitle) tutorialTitle.textContent = c.tutorialTitle
-  if (tutorialCopy) tutorialCopy.textContent = c.tutorialCopy
-  if (tutorialNext) tutorialNext.textContent = c.tutorialNext
+  const activeTutorial = tutorialSteps[locale][tutorialIndex]
+  if (tutorialStep) tutorialStep.textContent = activeTutorial.step
+  if (tutorialTitle) tutorialTitle.textContent = activeTutorial.title
+  if (tutorialCopy) tutorialCopy.textContent = activeTutorial.copy
+  if (tutorialNext) tutorialNext.textContent = activeTutorial.next
   if (worldMapButton) worldMapButton.textContent = c.worlds
   if (worldMapClose) worldMapClose.setAttribute('aria-label', locale === 'fa' ? 'بستن نقشه جهان‌ها' : 'Close world map')
 }
@@ -111,20 +157,36 @@ function openWorldMap() {
 
 continueButton?.addEventListener('click', () => {
   const hasJourney = localStorage.getItem('neyro.journeyStarted') === '1'
-  if (hasJourney || localStorage.getItem('neyro.tutorialComplete') === '1') home?.setAttribute('hidden', '')
-  else {
+  if (hasJourney || localStorage.getItem('neyro.tutorialComplete') === '1') {
+    home?.setAttribute('hidden', '')
+    openWorldMap()
+  } else {
+    tutorialIndex = 0
     home?.setAttribute('hidden', '')
     tutorial?.removeAttribute('hidden')
+    applyJourneyLocale()
   }
 })
+
 newButton?.addEventListener('click', () => {
+  tutorialIndex = 0
   home?.setAttribute('hidden', '')
   tutorial?.removeAttribute('hidden')
+  applyJourneyLocale()
 })
+
 tutorialNext?.addEventListener('click', () => {
+  if (tutorialIndex < tutorialSteps[currentLocale()].length - 1) {
+    tutorialIndex += 1
+    applyJourneyLocale()
+    return
+  }
+
   localStorage.setItem('neyro.journeyStarted', '1')
   tutorial?.setAttribute('hidden', '')
+  tutorialIndex = 0
   applyJourneyLocale()
+  openWorldMap()
 })
 worldMapButton?.addEventListener('click', openWorldMap)
 worldMapClose?.addEventListener('click', () => worldMapOverlay?.setAttribute('hidden', ''))
