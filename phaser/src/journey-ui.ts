@@ -18,6 +18,51 @@ const localizedNumber = (value: number) => currentLocale() === 'fa'
   ? String(value).replace(/\d/g, d => faDigits[Number(d)])
   : String(value)
 
+const tutorialSteps = {
+  fa: [
+    {
+      step: '۰۱ / ۰۳',
+      title: 'مسیر نور را بساز',
+      copy: 'از ◆ آغاز کن. هر کاشی را بچرخان تا اتصال نور به ★ برسد.',
+      next: 'بعدی'
+    },
+    {
+      step: '۰۲ / ۰۳',
+      title: 'کاشی‌ها را بچرخان',
+      copy: 'در دسکتاپ کلیک چپ و راست جهت چرخش را عوض می‌کند. در موبایل با لمس کاشی آن را بچرخان.',
+      next: 'بعدی'
+    },
+    {
+      step: '۰۳ / ۰۳',
+      title: 'پالس را بفرست',
+      copy: 'وقتی مسیر آماده شد «ارسال پالس» را بزن. اگر گیر کردی، راهنما یک حرکت درست را با هزینه امتیاز نشان می‌دهد.',
+      next: 'بریم به نقشه جهان‌ها'
+    }
+  ],
+  en: [
+    {
+      step: '01 / 03',
+      title: 'Build the light path',
+      copy: 'Start at ◆. Rotate the tiles until the light connection reaches ★.',
+      next: 'Next'
+    },
+    {
+      step: '02 / 03',
+      title: 'Rotate the tiles',
+      copy: 'On desktop, left and right click rotate in opposite directions. On mobile, tap a tile to rotate it.',
+      next: 'Next'
+    },
+    {
+      step: '03 / 03',
+      title: 'Send the pulse',
+      copy: 'When the route is ready, press Send pulse. If you get stuck, Hint reveals one correct move with a score cost.',
+      next: 'Open world map'
+    }
+  ]
+} as const
+
+let tutorialIndex = 0
+
 const journeyCopy = {
   fa: {
     continueJourney: 'ادامه مسیر', startGame: 'شروع بازی', newJourney: 'شروع سفر جدید',
@@ -29,7 +74,10 @@ const journeyCopy = {
     tutorialNext: 'فهمیدم، شروع کنیم', worlds: 'نقشه جهان‌ها',
     worldsCopy: 'فصل بعدی را انتخاب کن. فصل‌های آینده با پیشرفت تو باز می‌شوند.',
     world: 'فصل', stageComplete: 'مرحله کامل شد', restored: 'شبکه روشن شد',
-    moves: 'حرکت', time: 'زمان', hints: 'راهنما', nextStage: 'مرحله بعد'
+    masterComplete: 'فصل کامل شد', masterRestored: 'شبکه این فصل کامل روشن شد',
+    trackComplete: 'مسیر کامل شد', trackRestored: 'تمام ۵۰ فصل این مسیر روشن شدند',
+    moves: 'حرکت', time: 'زمان', hints: 'راهنما', nextStage: 'مرحله بعد',
+    nextChapter: 'ورود به فصل بعد', journeyComplete: 'مشاهده نقشه کامل'
   },
   en: {
     continueJourney: 'Continue journey', startGame: 'Start game', newJourney: 'New journey',
@@ -41,7 +89,10 @@ const journeyCopy = {
     tutorialNext: 'Got it — start', worlds: 'World map',
     worldsCopy: 'Choose your next world. Future worlds unlock as you progress.',
     world: 'World', stageComplete: 'Stage complete', restored: 'Network restored',
-    moves: 'Moves', time: 'Time', hints: 'Hints', nextStage: 'Next stage'
+    masterComplete: 'World complete', masterRestored: 'This world network is fully restored',
+    trackComplete: 'Journey complete', trackRestored: 'All 50 worlds in this track are restored',
+    moves: 'Moves', time: 'Time', hints: 'Hints', nextStage: 'Next stage',
+    nextChapter: 'Enter next world', journeyComplete: 'View completed map'
   }
 } as const
 
@@ -62,10 +113,11 @@ function applyJourneyLocale() {
   const tutorialStep = tutorial?.querySelector<HTMLElement>('.journey-step')
   const tutorialTitle = tutorial?.querySelector<HTMLElement>('strong')
   const tutorialCopy = tutorial?.querySelector<HTMLElement>('p')
-  if (tutorialStep) tutorialStep.textContent = c.tutorialStep
-  if (tutorialTitle) tutorialTitle.textContent = c.tutorialTitle
-  if (tutorialCopy) tutorialCopy.textContent = c.tutorialCopy
-  if (tutorialNext) tutorialNext.textContent = c.tutorialNext
+  const activeTutorial = tutorialSteps[locale][tutorialIndex]
+  if (tutorialStep) tutorialStep.textContent = activeTutorial.step
+  if (tutorialTitle) tutorialTitle.textContent = activeTutorial.title
+  if (tutorialCopy) tutorialCopy.textContent = activeTutorial.copy
+  if (tutorialNext) tutorialNext.textContent = activeTutorial.next
   if (worldMapButton) worldMapButton.textContent = c.worlds
   if (worldMapClose) worldMapClose.setAttribute('aria-label', locale === 'fa' ? 'بستن نقشه جهان‌ها' : 'Close world map')
 }
@@ -111,20 +163,36 @@ function openWorldMap() {
 
 continueButton?.addEventListener('click', () => {
   const hasJourney = localStorage.getItem('neyro.journeyStarted') === '1'
-  if (hasJourney || localStorage.getItem('neyro.tutorialComplete') === '1') home?.setAttribute('hidden', '')
-  else {
+  if (hasJourney || localStorage.getItem('neyro.tutorialComplete') === '1') {
+    home?.setAttribute('hidden', '')
+    openWorldMap()
+  } else {
+    tutorialIndex = 0
     home?.setAttribute('hidden', '')
     tutorial?.removeAttribute('hidden')
+    applyJourneyLocale()
   }
 })
+
 newButton?.addEventListener('click', () => {
+  tutorialIndex = 0
   home?.setAttribute('hidden', '')
   tutorial?.removeAttribute('hidden')
+  applyJourneyLocale()
 })
+
 tutorialNext?.addEventListener('click', () => {
+  if (tutorialIndex < tutorialSteps[currentLocale()].length - 1) {
+    tutorialIndex += 1
+    applyJourneyLocale()
+    return
+  }
+
   localStorage.setItem('neyro.journeyStarted', '1')
   tutorial?.setAttribute('hidden', '')
+  tutorialIndex = 0
   applyJourneyLocale()
+  openWorldMap()
 })
 worldMapButton?.addEventListener('click', openWorldMap)
 worldMapClose?.addEventListener('click', () => worldMapOverlay?.setAttribute('hidden', ''))
@@ -134,11 +202,53 @@ resultWorlds?.addEventListener('click', () => {
 })
 resultNext?.addEventListener('click', () => {
   resultOverlay?.setAttribute('hidden', '')
+
+  const action = resultNext.dataset.resultAction || 'next-stage'
+
+  if (action === 'worlds') {
+    openWorldMap()
+    return
+  }
+
+  if (action === 'next-chapter') {
+    const nextChapter = Number(resultNext.dataset.nextChapter || 0)
+    const chapterSelect = document.querySelector<HTMLSelectElement>('#chapterSelect')
+    const stageSelect = document.querySelector<HTMLSelectElement>('#stageSelect')
+    const loadButton = document.querySelector<HTMLButtonElement>('#loadButton')
+
+    if (!nextChapter || !chapterSelect || !stageSelect || !loadButton) {
+      openWorldMap()
+      return
+    }
+
+    chapterSelect.value = String(nextChapter)
+    chapterSelect.dispatchEvent(new Event('change', { bubbles: true }))
+
+    window.setTimeout(() => {
+      stageSelect.value = String((nextChapter - 1) * 500 + 1)
+      loadButton.click()
+    }, 0)
+
+    return
+  }
+
   document.querySelector<HTMLButtonElement>('#nextButton')?.click()
 })
 
 window.addEventListener('neyro:stage-complete', event => {
-  const detail = (event as CustomEvent).detail as { mastery:number; stars:number; moves:number; hints:number; elapsedSeconds:number; xpGain:number }
+  const detail = (event as CustomEvent).detail as {
+    stageNumber:number
+    chapter:number
+    mastery:number
+    stars:number
+    moves:number
+    hints:number
+    elapsedSeconds:number
+    xpGain:number
+    isMasterStage:boolean
+    isTrackComplete:boolean
+    nextChapter:number|null
+  }
   const locale = currentLocale()
   const c = journeyCopy[locale]
   const stars = document.querySelector<HTMLElement>('#resultStars')
@@ -155,13 +265,39 @@ window.addEventListener('neyro:stage-complete', event => {
   if (xp) xp.textContent = '+' + localizedNumber(detail.xpGain) + ' XP'
   const kicker = document.querySelector<HTMLElement>('#resultKicker')
   const title = document.querySelector<HTMLElement>('#resultTitle')
-  if (kicker) kicker.textContent = c.stageComplete
-  if (title) title.textContent = c.restored
+  if (detail.isTrackComplete) {
+    if (kicker) kicker.textContent = c.trackComplete
+    if (title) title.textContent = c.trackRestored
+  } else if (detail.isMasterStage) {
+    if (kicker) kicker.textContent = c.masterComplete
+    if (title) title.textContent = c.masterRestored
+  } else {
+    if (kicker) kicker.textContent = c.stageComplete
+    if (title) title.textContent = c.restored
+  }
   document.querySelector<HTMLElement>('#resultMovesLabel')!.textContent = c.moves
   document.querySelector<HTMLElement>('#resultTimeLabel')!.textContent = c.time
   document.querySelector<HTMLElement>('#resultHintsLabel')!.textContent = c.hints
   if (resultWorlds) resultWorlds.textContent = c.worlds
-  if (resultNext) resultNext.textContent = c.nextStage
+  if (resultNext) {
+    resultNext.textContent = detail.isTrackComplete
+      ? c.journeyComplete
+      : detail.isMasterStage
+        ? c.nextChapter
+        : c.nextStage
+
+    resultNext.dataset.resultAction = detail.isTrackComplete
+      ? 'worlds'
+      : detail.isMasterStage
+        ? 'next-chapter'
+        : 'next-stage'
+
+    if (detail.nextChapter !== null) {
+      resultNext.dataset.nextChapter = String(detail.nextChapter)
+    } else {
+      delete resultNext.dataset.nextChapter
+    }
+  }
   window.setTimeout(() => resultOverlay?.removeAttribute('hidden'), 180)
 })
 

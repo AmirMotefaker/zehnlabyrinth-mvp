@@ -47,6 +47,13 @@ export const DIFFICULTIES: Difficulty[] = ['easy', 'medium', 'hard']
 export const STAGES_PER_TRACK = 25000
 export const CHAPTERS_PER_TRACK = 50
 export const STAGES_PER_CHAPTER = STAGES_PER_TRACK / CHAPTERS_PER_TRACK
+
+export function isMasterStage(stageNumber: number): boolean {
+  return Number.isInteger(stageNumber)
+    && stageNumber >= 1
+    && stageNumber <= STAGES_PER_TRACK
+    && stageNumber % STAGES_PER_CHAPTER === 0
+}
 export const TOTAL_TRACKS = AGE_BANDS.length * DIFFICULTIES.length
 export const TOTAL_STAGES = TOTAL_TRACKS * STAGES_PER_TRACK
 
