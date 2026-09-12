@@ -45,7 +45,19 @@
         </div>
       </section>
 
-      <section id="profileOverlay" class="journey-overlay" hidden aria-label="Player profile">
+      <section id="sensoryOverlay" class="journey-overlay" hidden aria-label="Accessibility and sensory settings">
+  <div class="journey-panel sensory-panel">
+    <div class="journey-panel-head"><div><small>NEYRO COMFORT</small><h2 id="sensoryTitle">تنظیمات تجربه</h2></div><button id="sensoryClose" type="button">×</button></div>
+    <div class="sensory-grid">
+      <label><span id="soundLabel">صدا</span><input id="soundToggle" type="checkbox" checked></label>
+      <label><span id="hapticsLabel">لرزش</span><input id="hapticsToggle" type="checkbox" checked></label>
+      <label><span id="motionLabel">حرکت کمتر</span><input id="motionToggle" type="checkbox"></label>
+      <label><span id="contrastLabel">کنتراست بالا</span><input id="contrastToggle" type="checkbox"></label>
+    </div>
+  </div>
+</section>
+
+<section id="profileOverlay" class="journey-overlay" hidden aria-label="Player profile">
         <div class="journey-panel profile-panel">
           <div class="journey-panel-head"><div><small>NEYRO ID</small><h2 id="profileTitle">پروفایل بازیکن</h2></div><button id="profileClose" type="button" aria-label="بستن">×</button></div>
           <section class="profile-hero-card">
@@ -93,6 +105,7 @@
         <label class="control-card theme-control"><span id="themeText">حالت نمایش</span><select id="themeSelect" aria-label="حالت نمایش"><option value="dark">تیره</option><option value="light">روشن</option><option value="system">سیستم</option></select></label>
         <button id="localeButton" class="compact language-switch topbar-language" type="button" aria-label="تغییر زبان">EN</button>
         <button id="worldMapButton" class="compact" type="button" aria-label="نقشه جهان‌ها">◈</button>
+        <button id="sensoryButton" class="compact" type="button" aria-label="تنظیمات دسترسی">◐</button>
         <button id="profileButton" class="compact profile-open" type="button" aria-label="پروفایل بازیکن">◎</button>
       </section>
 
@@ -148,6 +161,7 @@
     </main>
     <script type="module" src="/src/journey-ui.ts"></script>
     <script type="module" src="/src/profile-ui.ts"></script>
+    <script type="module" src="/src/sensory-ui.ts"></script>
     <script type="module" src="/src/ui-preferences.ts"></script>
     <script type="module" src="/src/premium-ui.ts"></script>
     <script type="module" src="/src/locale-numbers.ts"></script>

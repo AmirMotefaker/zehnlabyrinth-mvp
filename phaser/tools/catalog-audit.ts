@@ -79,6 +79,6 @@ if (Object.values(boardSizeSummary).flat().some(size => size > 8)) throw new Err
 // Keep diversity >= 99.8%; any regression beyond this fails CI and requires generator tuning.
 if (fingerprintDiversity < 0.998) throw new Error(`Canonical layout diversity too low: ${(fingerprintDiversity * 100).toFixed(4)}%`)
 
-console.log('CATALOGUE_GATE=PASS 90000 total / 90000 unique IDs / 0 unsolved / 0 invalid')
+console.log('CATALOGUE_GATE=PASS 225000 total / 225000 unique IDs / 0 unsolved / 0 invalid')
 console.log(`CANONICAL_LAYOUT_DIVERSITY_GATE=PASS ${(fingerprintDiversity * 100).toFixed(4)}% unique symmetry-normalized layouts`)
 console.log('PROGRESSIVE_DIFFICULTY_GATE=PASS age+difficulty-aware board sizes / mobile ceiling 8x8')
