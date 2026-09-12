@@ -26,7 +26,7 @@ function locale() { return document.documentElement.lang === 'en' ? 'en' : 'fa' 
 function digits(value: string) { return locale() === 'fa' ? value.replace(/\d/g, d => FA[Number(d)]) : value }
 function age(): AgeBand { return (ageSelect?.value as AgeBand) || '5-8' }
 function difficulty(): Difficulty { return (difficultySelect?.value as Difficulty) || 'easy' }
-function chapter() { return Math.min(20, Math.max(1, Number(chapterSelect?.value || 1))) }
+function chapter() { return Math.min(50, Math.max(1, Number(chapterSelect?.value || 1))) }
 function boardSize() {
   const c = chapter()
   if (age() === '5-8') {

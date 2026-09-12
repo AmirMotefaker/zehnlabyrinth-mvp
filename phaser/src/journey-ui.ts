@@ -74,7 +74,10 @@ const journeyCopy = {
     tutorialNext: 'فهمیدم، شروع کنیم', worlds: 'نقشه جهان‌ها',
     worldsCopy: 'فصل بعدی را انتخاب کن. فصل‌های آینده با پیشرفت تو باز می‌شوند.',
     world: 'فصل', stageComplete: 'مرحله کامل شد', restored: 'شبکه روشن شد',
-    moves: 'حرکت', time: 'زمان', hints: 'راهنما', nextStage: 'مرحله بعد'
+    masterComplete: 'فصل کامل شد', masterRestored: 'شبکه این فصل کامل روشن شد',
+    trackComplete: 'مسیر کامل شد', trackRestored: 'تمام ۵۰ فصل این مسیر روشن شدند',
+    moves: 'حرکت', time: 'زمان', hints: 'راهنما', nextStage: 'مرحله بعد',
+    nextChapter: 'ورود به فصل بعد', journeyComplete: 'مشاهده نقشه کامل'
   },
   en: {
     continueJourney: 'Continue journey', startGame: 'Start game', newJourney: 'New journey',
@@ -86,7 +89,10 @@ const journeyCopy = {
     tutorialNext: 'Got it — start', worlds: 'World map',
     worldsCopy: 'Choose your next world. Future worlds unlock as you progress.',
     world: 'World', stageComplete: 'Stage complete', restored: 'Network restored',
-    moves: 'Moves', time: 'Time', hints: 'Hints', nextStage: 'Next stage'
+    masterComplete: 'World complete', masterRestored: 'This world network is fully restored',
+    trackComplete: 'Journey complete', trackRestored: 'All 50 worlds in this track are restored',
+    moves: 'Moves', time: 'Time', hints: 'Hints', nextStage: 'Next stage',
+    nextChapter: 'Enter next world', journeyComplete: 'View completed map'
   }
 } as const
 
@@ -196,11 +202,53 @@ resultWorlds?.addEventListener('click', () => {
 })
 resultNext?.addEventListener('click', () => {
   resultOverlay?.setAttribute('hidden', '')
+
+  const action = resultNext.dataset.resultAction || 'next-stage'
+
+  if (action === 'worlds') {
+    openWorldMap()
+    return
+  }
+
+  if (action === 'next-chapter') {
+    const nextChapter = Number(resultNext.dataset.nextChapter || 0)
+    const chapterSelect = document.querySelector<HTMLSelectElement>('#chapterSelect')
+    const stageSelect = document.querySelector<HTMLSelectElement>('#stageSelect')
+    const loadButton = document.querySelector<HTMLButtonElement>('#loadButton')
+
+    if (!nextChapter || !chapterSelect || !stageSelect || !loadButton) {
+      openWorldMap()
+      return
+    }
+
+    chapterSelect.value = String(nextChapter)
+    chapterSelect.dispatchEvent(new Event('change', { bubbles: true }))
+
+    window.setTimeout(() => {
+      stageSelect.value = String((nextChapter - 1) * 500 + 1)
+      loadButton.click()
+    }, 0)
+
+    return
+  }
+
   document.querySelector<HTMLButtonElement>('#nextButton')?.click()
 })
 
 window.addEventListener('neyro:stage-complete', event => {
-  const detail = (event as CustomEvent).detail as { mastery:number; stars:number; moves:number; hints:number; elapsedSeconds:number; xpGain:number }
+  const detail = (event as CustomEvent).detail as {
+    stageNumber:number
+    chapter:number
+    mastery:number
+    stars:number
+    moves:number
+    hints:number
+    elapsedSeconds:number
+    xpGain:number
+    isMasterStage:boolean
+    isTrackComplete:boolean
+    nextChapter:number|null
+  }
   const locale = currentLocale()
   const c = journeyCopy[locale]
   const stars = document.querySelector<HTMLElement>('#resultStars')
@@ -217,13 +265,39 @@ window.addEventListener('neyro:stage-complete', event => {
   if (xp) xp.textContent = '+' + localizedNumber(detail.xpGain) + ' XP'
   const kicker = document.querySelector<HTMLElement>('#resultKicker')
   const title = document.querySelector<HTMLElement>('#resultTitle')
-  if (kicker) kicker.textContent = c.stageComplete
-  if (title) title.textContent = c.restored
+  if (detail.isTrackComplete) {
+    if (kicker) kicker.textContent = c.trackComplete
+    if (title) title.textContent = c.trackRestored
+  } else if (detail.isMasterStage) {
+    if (kicker) kicker.textContent = c.masterComplete
+    if (title) title.textContent = c.masterRestored
+  } else {
+    if (kicker) kicker.textContent = c.stageComplete
+    if (title) title.textContent = c.restored
+  }
   document.querySelector<HTMLElement>('#resultMovesLabel')!.textContent = c.moves
   document.querySelector<HTMLElement>('#resultTimeLabel')!.textContent = c.time
   document.querySelector<HTMLElement>('#resultHintsLabel')!.textContent = c.hints
   if (resultWorlds) resultWorlds.textContent = c.worlds
-  if (resultNext) resultNext.textContent = c.nextStage
+  if (resultNext) {
+    resultNext.textContent = detail.isTrackComplete
+      ? c.journeyComplete
+      : detail.isMasterStage
+        ? c.nextChapter
+        : c.nextStage
+
+    resultNext.dataset.resultAction = detail.isTrackComplete
+      ? 'worlds'
+      : detail.isMasterStage
+        ? 'next-chapter'
+        : 'next-stage'
+
+    if (detail.nextChapter !== null) {
+      resultNext.dataset.nextChapter = String(detail.nextChapter)
+    } else {
+      delete resultNext.dataset.nextChapter
+    }
+  }
   window.setTimeout(() => resultOverlay?.removeAttribute('hidden'), 180)
 })
 
