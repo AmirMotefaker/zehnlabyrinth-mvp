@@ -276,3 +276,29 @@ body[data-theme="light"] .journey-panel{background:linear-gradient(145deg,#fffff
 
 /* Issue #66/#68 */
 .sensory-panel{width:min(560px,92vw)}.sensory-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.sensory-grid label{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;border:1px solid rgba(125,180,200,.18);border-radius:16px;background:rgba(255,255,255,.04)}.sensory-grid input{width:20px;height:20px}.achievement-toast,.sensory-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:12000;padding:12px 18px;border-radius:14px;background:#0b1a26;color:#effcff;border:1px solid rgba(67,224,208,.32);box-shadow:0 18px 60px rgba(0,0,0,.35)}body.neyro-high-contrast{--neyro-contrast:1}body.neyro-high-contrast .panel,body.neyro-high-contrast .control-card,body.neyro-high-contrast .game-card{outline:2px solid currentColor}body.neyro-reduced-motion *,body.neyro-reduced-motion *::before,body.neyro-reduced-motion *::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}:focus-visible{outline:3px solid #34e2d3!important;outline-offset:3px}@media(max-width:640px){.sensory-grid{grid-template-columns:1fr}}
+
+/* Issue #122 — modal dismissal visibility and touch target */
+.journey-panel-head button {
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  cursor:pointer;
+  font-weight:800;
+  line-height:1;
+  touch-action:manipulation;
+}
+body[data-theme="light"] .journey-panel-head button {
+  color:#102635;
+  background:#e1eef2;
+  border:1px solid rgba(17,132,150,.18);
+}
+.journey-panel-head button:hover {
+  transform:translateY(-1px);
+}
+@media(max-width:640px){
+  .journey-panel-head button {
+    width:44px;
+    height:44px;
+    min-width:44px;
+  }
+}
