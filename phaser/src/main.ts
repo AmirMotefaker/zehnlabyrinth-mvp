@@ -23,7 +23,6 @@ const FA = '۰۱۲۳۴۵۶۷۸۹'
 const DELTA: Record<Direction, { row: number; col: number }> = {
   N: { row: -1, col: 0 }, E: { row: 0, col: 1 }, S: { row: 1, col: 0 }, W: { row: 0, col: -1 }
 }
-const ARROW: Record<Direction, string> = { N: '↑', E: '→', S: '↓', W: '←' }
 
 const copy = {
   fa: {
@@ -477,7 +476,6 @@ class NeyroScene extends Phaser.Scene {
         const color = tile.kind === 'start' ? 0x54f2cc : 0xffd45c
         const node = this.add.graphics(); node.fillStyle(0x071421, 1); node.lineStyle(4, color, 1); node.fillCircle(x, y, cell * .24); node.strokeCircle(x, y, cell * .24); this.board!.add(node)
         this.board!.add(this.add.text(x, y, tile.kind === 'start' ? '◆' : '★', { fontFamily: 'system-ui', fontSize: `${Math.max(13, cell * .24)}px`, color: tile.kind === 'start' ? '#54f2cc' : '#ffd45c', fontStyle: 'bold' }).setOrigin(.5))
-        if (tile.kind === 'start') { const d = DELTA[this.stage.startDirection]; this.board!.add(this.add.text(x + d.col * cell * .39, y + d.row * cell * .39, ARROW[this.stage.startDirection], { fontFamily: 'system-ui', fontSize: `${Math.max(16, cell * .28)}px`, color: '#54f2cc', fontStyle: 'bold' }).setOrigin(.5)) }
         return
       }
       if (tile.kind === 'blocker') {

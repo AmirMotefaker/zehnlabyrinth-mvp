@@ -112,8 +112,31 @@ function renderProfile() {
   })
 }
 
-profileButton?.addEventListener('click', () => { renderProfile(); profileOverlay?.removeAttribute('hidden') })
-profileClose?.addEventListener('click', () => profileOverlay?.setAttribute('hidden', ''))
+function openProfile() {
+  renderProfile()
+  profileOverlay?.removeAttribute('hidden')
+  profileClose?.focus()
+}
+
+function closeProfile() {
+  if (!profileOverlay || profileOverlay.hasAttribute('hidden')) return
+  profileOverlay.setAttribute('hidden', '')
+  profileButton?.focus()
+}
+
+profileButton?.addEventListener('click', openProfile)
+profileClose?.addEventListener('click', closeProfile)
+
+profileOverlay?.addEventListener('click', event => {
+  if (event.target === profileOverlay) closeProfile()
+})
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && profileOverlay && !profileOverlay.hasAttribute('hidden')) {
+    event.preventDefault()
+    closeProfile()
+  }
+})
 
 window.addEventListener('neyro:stage-complete', event => {
   const detail = (event as CustomEvent<StageCompleteDetail>).detail

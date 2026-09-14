@@ -194,8 +194,25 @@ tutorialNext?.addEventListener('click', () => {
   applyJourneyLocale()
   openWorldMap()
 })
+function closeWorldMap() {
+  if (!worldMapOverlay || worldMapOverlay.hasAttribute('hidden')) return
+  worldMapOverlay.setAttribute('hidden', '')
+  worldMapButton?.focus()
+}
+
 worldMapButton?.addEventListener('click', openWorldMap)
-worldMapClose?.addEventListener('click', () => worldMapOverlay?.setAttribute('hidden', ''))
+worldMapClose?.addEventListener('click', closeWorldMap)
+
+worldMapOverlay?.addEventListener('click', event => {
+  if (event.target === worldMapOverlay) closeWorldMap()
+})
+
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && worldMapOverlay && !worldMapOverlay.hasAttribute('hidden')) {
+    event.preventDefault()
+    closeWorldMap()
+  }
+})
 resultWorlds?.addEventListener('click', () => {
   resultOverlay?.setAttribute('hidden', '')
   openWorldMap()
